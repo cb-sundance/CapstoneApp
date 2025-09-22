@@ -30,23 +30,28 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WelcomeScreen(onClick: () -> Unit) {
+fun WelcomeScreen(onClickNext: () -> Unit) {
+    // Track background color
+    var bgColor by remember { mutableStateOf(Color(0xFFEDE7F6)) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEDE7F6)) // Light purple background
-            .padding(24.dp),              // Add spacing around edges
+            .background(bgColor)
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Welcome to My Capstone App",
-            fontSize = 28.sp,             // Bigger font size
-            color = Color(0xFF4A148C)     // Dark purple text
+            fontSize = 28.sp,
+            color = Color(0xFF4A148C)
         )
-        Spacer(modifier = Modifier.height(20.dp)) // Space between text and button
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Button 1: Next Screen
         Button(
-            onClick = onClick,
+            onClick = onClickNext,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -55,6 +60,30 @@ fun WelcomeScreen(onClick: () -> Unit) {
         ) {
             Text(
                 text = "Next Screen",
+                fontSize = 18.sp,
+                color = Color.White
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Button 2: Change Background
+        Button(
+            onClick = {
+                bgColor = when (bgColor) {
+                    Color(0xFFEDE7F6) -> Color(0xFFC5CAE9)
+                    Color(0xFFC5CAE9) -> Color(0xFFB3E5FC)
+                    else -> Color(0xFFEDE7F6)
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097A7)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .height(60.dp)
+                .width(200.dp)
+        ) {
+            Text(
+                text = "Change Background",
                 fontSize = 18.sp,
                 color = Color.White
             )
@@ -73,15 +102,22 @@ fun NextScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Next screen coming soon!",
+            text = "Next screen coming soon!",
             fontSize = 26.sp,
             color = Color(0xFF311B92)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            "You can add more features here next week.",
+            text = "You can add more features here next week.",
             fontSize = 18.sp,
-            color = Color(0xFF512DA8)
+            color = Color(0xFF512DA8),
+            lineHeight = 24.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Thank you for checking out my Week 1 progress!",
+            fontSize = 16.sp,
+            color = Color(0xFF673AB7)
         )
     }
 }
