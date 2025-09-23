@@ -1,6 +1,7 @@
-package com.example.capstoneapp
+package com.cb.capstoneapp
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -33,6 +35,7 @@ class MainActivity : ComponentActivity() {
 fun WelcomeScreen(onClickNext: () -> Unit) {
     // Track background color
     var bgColor by remember { mutableStateOf(Color(0xFFEDE7F6)) }
+    val context = LocalContext.current // for Toast
 
     Column(
         modifier = Modifier
@@ -67,14 +70,17 @@ fun WelcomeScreen(onClickNext: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Button 2: Change Background
+        // Button 2: Change Background + Toast feedback
         Button(
             onClick = {
+                // Cycle through a few colors
                 bgColor = when (bgColor) {
                     Color(0xFFEDE7F6) -> Color(0xFFC5CAE9)
                     Color(0xFFC5CAE9) -> Color(0xFFB3E5FC)
                     else -> Color(0xFFEDE7F6)
                 }
+                // show a short toast to give the user feedback
+                Toast.makeText(context, "Background changed!", Toast.LENGTH_SHORT).show()
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097A7)),
             shape = RoundedCornerShape(12.dp),
