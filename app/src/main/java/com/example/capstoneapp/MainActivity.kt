@@ -62,7 +62,7 @@ fun WelcomeScreen(onClickNext: () -> Unit) {
                 .width(200.dp)
         ) {
             Text(
-                text = "Next Screen",
+                text = "Next Page",
                 fontSize = 18.sp,
                 color = Color.White
             )
@@ -89,7 +89,7 @@ fun WelcomeScreen(onClickNext: () -> Unit) {
                 .width(200.dp)
         ) {
             Text(
-                text = "Change Background",
+                text = "Change Background Color",
                 fontSize = 18.sp,
                 color = Color.White
             )
