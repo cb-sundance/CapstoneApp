@@ -1,6 +1,7 @@
 package com.example.myapp
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,8 +47,13 @@ fun WelcomeScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableStateOf(0) }
-    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+
+    val colors = listOf(
+        Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4),
+        Color(0xFFFFCDD2), Color(0xFFD1C4E9), Color(0xFFFFE0B2)
+    )
     val currentColor = colors[colorIndex % colors.size]
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -93,6 +100,7 @@ fun WelcomeScreen(navController: NavHostController) {
                 if (name.isBlank()) {
                     showError = true
                 } else {
+                    Toast.makeText(context, "Navigating to About Me!", Toast.LENGTH_SHORT).show()
                     navController.navigate("aboutMe/$name")
                 }
             },
@@ -143,10 +151,12 @@ fun AboutMeScreen(userName: String) {
             fontWeight = FontWeight.Medium
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            "This is the About Me page.",
+            "I am currently working on my Android app for my Capstone project. "
+                    + "This About Me screen shows basic navigation, dynamic data handling, "
+                    + "and now a polished layout with consistent padding, spacing, and colors.",
             fontSize = 18.sp,
             lineHeight = 24.sp
         )
