@@ -21,21 +21,28 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             var showNext by remember { mutableStateOf(false) }
+            var userName by remember { mutableStateOf("") }
 
             if (!showNext) {
-                WelcomeScreen { showNext = true }
+                WelcomeScreen(
+                    onClickNext = { name ->
+                        userName = name
+                        showNext = true
+                    }
+                )
             } else {
-                NextScreen()
+                NextScreen(userName)
             }
         }
     }
 }
 
 @Composable
-fun WelcomeScreen(onClickNext: () -> Unit) {
+fun WelcomeScreen(onClickNext: (String) -> Unit) {
     // Track background color
     var bgColor by remember { mutableStateOf(Color(0xFFEDE7F6)) }
     val context = LocalContext.current // for Toast
+    var userName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -52,9 +59,18 @@ fun WelcomeScreen(onClickNext: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Input field
+        TextField(
+            value = userName,
+            onValueChange = { userName = it },
+            label = { Text("Enter your name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
         // Button 1: Next Screen
         Button(
-            onClick = onClickNext,
+            onClick = { onClickNext(userName) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -71,15 +87,19 @@ fun WelcomeScreen(onClickNext: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Button 2: Change Background + Toast feedback
+        val colors = listOf(
+            Color(0xFFEDE7F6),
+            Color(0xFFC5CAE9),
+            Color(0xFFB3E5FC),
+            Color(0xFFFFF59D),
+            Color(0xFFFFAB91)
+        )
+        var colorIndex by remember { mutableStateOf(0) }
+
         Button(
             onClick = {
-                // Cycle through a few colors
-                bgColor = when (bgColor) {
-                    Color(0xFFEDE7F6) -> Color(0xFFC5CAE9)
-                    Color(0xFFC5CAE9) -> Color(0xFFB3E5FC)
-                    else -> Color(0xFFEDE7F6)
-                }
-                // show a short toast to give the user feedback
+                colorIndex = (colorIndex + 1) % colors.size
+                bgColor = colors[colorIndex]
                 Toast.makeText(context, "Background changed!", Toast.LENGTH_SHORT).show()
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097A7)),
@@ -98,7 +118,7 @@ fun WelcomeScreen(onClickNext: () -> Unit) {
 }
 
 @Composable
-fun NextScreen() {
+fun NextScreen(name: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +128,7 @@ fun NextScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Next screen coming soon!",
+            text = "Welcome, $name!",
             fontSize = 26.sp,
             color = Color(0xFF311B92)
         )
