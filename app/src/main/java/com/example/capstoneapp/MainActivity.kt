@@ -3,6 +3,7 @@ package com.example.myapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -34,7 +35,7 @@ fun MyApp() {
         composable("welcome") { WelcomeScreen(navController) }
         composable("aboutMe/{userName}") { backStackEntry ->
             val name = backStackEntry.arguments?.getString("userName") ?: ""
-            AboutMeScreen(userName = name)
+            AboutMeScreen(name, navController)
         }
     }
 }
@@ -45,7 +46,7 @@ fun WelcomeScreen(navController: NavHostController) {
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableStateOf(0) }
     val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
-    val currentColor = colors[colorIndex % colors.size]
+    val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
     Column(
         modifier = Modifier
@@ -105,32 +106,29 @@ fun WelcomeScreen(navController: NavHostController) {
 }
 
 @Composable
-fun AboutMeScreen(userName: String) {
-    var isDarkMode by remember { mutableStateOf(false) }
-    val bgColor = if (isDarkMode) Color(0xFF212121) else Color(0xFFFAFAFA)
-    val textColor = if (isDarkMode) Color.White else Color.Black
-
+fun AboutMeScreen(userName: String, navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor)
+            .background(Color(0xFFFAFAFA))
             .padding(20.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = textColor)
+        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(15.dp))
-        Text("Hello, $userName!", fontSize = 22.sp, color = textColor)
+        Text("Hello, $userName!", fontSize = 22.sp)
         Spacer(modifier = Modifier.height(15.dp))
-        Text("This is the About Me page.", fontSize = 18.sp, color = textColor)
-        Spacer(modifier = Modifier.height(20.dp))
+        Text("This is the About Me page.", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(30.dp))
 
-        // Settings / Dark Mode toggle
+        // Back button
         Button(
-            onClick = { isDarkMode = !isDarkMode },
+            onClick = { navController.popBackStack() },
             modifier = Modifier.fillMaxWidth(0.5f)
         ) {
-            Text(if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode")
+            Text("Back")
         }
     }
 }
+
