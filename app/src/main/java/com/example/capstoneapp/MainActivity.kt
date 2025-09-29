@@ -152,7 +152,7 @@ fun WelcomeScreen(
 }
 
 @Composable
-fun NextScreen(userName: String, userAge: String, userHobby: String) {
+fun NextScreen(userName: String, userAge: String = "", userHobby: String = "") {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -161,14 +161,46 @@ fun NextScreen(userName: String, userAge: String, userHobby: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Welcome, $userName!", fontSize = 26.sp, color = Color(0xFF311B92))
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Age: $userAge", fontSize = 20.sp, color = Color(0xFF512DA8))
-        Text("Hobby: $userHobby", fontSize = 20.sp, color = Color(0xFF512DA8))
+        Text(
+            "Welcome, $userName!",
+            fontSize = 28.sp,
+            color = Color(0xFF311B92)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (userAge.isNotBlank()) {
+            Text(
+                "Age: $userAge",
+                fontSize = 20.sp,
+                color = Color(0xFF512DA8),
+                lineHeight = 24.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        if (userHobby.isNotBlank()) {
+            Text(
+                "Hobby: $userHobby",
+                fontSize = 20.sp,
+                color = Color(0xFF512DA8),
+                lineHeight = 24.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Text(
+            "You can add more features here next week.",
+            fontSize = 18.sp,
+            color = Color(0xFF512DA8),
+            lineHeight = 24.sp
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text("You can add more features here next week.", fontSize = 18.sp, color = Color(0xFF512DA8))
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Thank you for checking out my Week 2 progress!", fontSize = 16.sp, color = Color(0xFF673AB7))
+
+        Text(
+            "Thank you for checking out my Week 2 progress!",
+            fontSize = 16.sp,
+            color = Color(0xFF673AB7)
+        )
     }
 }
 
