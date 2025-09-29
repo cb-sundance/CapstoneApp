@@ -133,7 +133,7 @@ fun AboutMeScreen(userName: String) {
             .fillMaxSize()
             .background(Color(0xFFFAFAFA))
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -160,5 +160,22 @@ fun AboutMeScreen(userName: String) {
             fontSize = 18.sp,
             lineHeight = 24.sp
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Hobbies Section
+        Text(
+            "My Hobbies & Interests",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF512DA8)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        val hobbies = listOf("Reading", "Coding", "Gaming", "Hiking", "Music")
+        hobbies.forEach { hobby ->
+            Text("• $hobby", fontSize = 18.sp, modifier = Modifier.padding(vertical = 2.dp))
+        }
     }
 }
