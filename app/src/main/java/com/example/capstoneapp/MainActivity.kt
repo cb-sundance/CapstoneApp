@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,13 +52,18 @@ fun WelcomeScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .background(currentColor)
-            .padding(20.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+        Text(
+            "Welcome!",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF311B92)
+        )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         OutlinedTextField(
             value = name,
@@ -66,7 +72,9 @@ fun WelcomeScreen(navController: NavHostController) {
                 showError = false
             },
             label = { Text("Enter your name") },
-            modifier = Modifier.fillMaxWidth(0.8f)
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .padding(vertical = 8.dp)
         )
 
         if (showError) {
@@ -88,18 +96,24 @@ fun WelcomeScreen(navController: NavHostController) {
                     navController.navigate("aboutMe/$name")
                 }
             },
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(55.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Next Page")
+            Text("Next Page", fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
         Button(
             onClick = { colorIndex++ },
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(55.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Change Background")
+            Text("Change Background", fontSize = 18.sp)
         }
     }
 }
@@ -110,14 +124,31 @@ fun AboutMeScreen(userName: String) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFAFAFA))
-            .padding(20.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(15.dp))
-        Text("Hello, $userName!", fontSize = 22.sp)
-        Spacer(modifier = Modifier.height(15.dp))
-        Text("This is the About Me page.", fontSize = 18.sp)
+        Text(
+            "About Me",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF311B92)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            "Hello, $userName!",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            "This is the About Me page.",
+            fontSize = 18.sp,
+            lineHeight = 24.sp
+        )
     }
 }
