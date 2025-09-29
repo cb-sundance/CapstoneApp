@@ -1,6 +1,7 @@
 package com.cb.capstoneapp
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -20,187 +22,127 @@ class MainActivity : ComponentActivity() {
         setContent {
             var showNext by remember { mutableStateOf(false) }
             var userName by remember { mutableStateOf("") }
-            var userAge by remember { mutableStateOf("") }
-            var userHobby by remember { mutableStateOf("") }
 
             if (!showNext) {
                 WelcomeScreen(
-                    userName,
-                    userAge,
-                    userHobby,
-                    onNameChange = { userName = it },
-                    onAgeChange = { userAge = it },
-                    onHobbyChange = { userHobby = it },
-                    onClickNext = {
+                    onClickNext = { name ->
+                        userName = name
                         showNext = true
                     }
                 )
             } else {
-                NextScreen(userName, userAge, userHobby)
+                NextScreen(userName)
             }
         }
     }
 }
 
 @Composable
-fun WelcomeScreen(
-    userName: String,
-    userAge: String,
-    userHobby: String,
-    onNameChange: (String) -> Unit,
-    onAgeChange: (String) -> Unit,
-    onHobbyChange: (String) -> Unit,
-    onClickNext: () -> Unit
-) {
+fun WelcomeScreen(onClickNext: (String) -> Unit) {
     var bgColor by remember { mutableStateOf(Color(0xFFEDE7F6)) }
-    var errorMessage by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    var userName by remember { mutableStateOf("") }
+    val colors = listOf(
+        Color(0xFFEDE7F6),
+        Color(0xFFC5CAE9),
+        Color(0xFFB3E5FC),
+        Color(0xFFFFF59D),
+        Color(0xFFFFAB91)
+    )
+    var colorIndex by remember { mutableStateOf(0) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(bgColor)
-            .padding(24.dp),
+            .padding(32.dp), // polished spacing
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Welcome to My Capstone App", fontSize = 28.sp, color = Color(0xFF4A148C))
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Welcome to My Capstone App",
+            fontSize = 30.sp, // polished font size
+            color = Color(0xFF4A148C)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         TextField(
             value = userName,
-            onValueChange = onNameChange,
+            onValueChange = { userName = it },
             label = { Text("Enter your name") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        TextField(
-            value = userAge,
-            onValueChange = { input ->
-                // Only allow digits
-                if (input.all { it.isDigit() }) {
-                    onAgeChange(input)
-                }
-            },
-            label = { Text("Enter your age (numbers only)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = userHobby,
-            onValueChange = onHobbyChange,
-            label = { Text("Enter your hobby") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
+        // Next Page button
         Button(
-            onClick = {
-                // Validation logic
-                errorMessage = when {
-                    userName.isBlank() -> "Please enter your name."
-                    userAge.isBlank() -> "Please enter your age."
-                    userAge.toIntOrNull() == null -> "Age must be a number."
-                    userHobby.isBlank() -> "Please enter your hobby."
-                    else -> {
-                        onClickNext()
-                        ""
-                    }
-                }
-            },
+            onClick = { onClickNext(userName) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .height(60.dp)
-                .width(200.dp)
+                .fillMaxWidth(0.6f) // consistent button width
         ) {
-            Text("Next Page", fontSize = 18.sp, color = Color.White)
+            Text(
+                text = "Next Page",
+                fontSize = 18.sp,
+                color = Color.White
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val colors = listOf(
-            Color(0xFFEDE7F6),
-            Color(0xFFC5CAE9),
-            Color(0xFFB3E5FC),
-            Color(0xFFFFF59D),
-            Color(0xFFFFAB91)
-        )
-        var colorIndex by remember { mutableStateOf(0) }
-
+        // Background color button
         Button(
             onClick = {
                 colorIndex = (colorIndex + 1) % colors.size
                 bgColor = colors[colorIndex]
+                Toast.makeText(context, "Background changed!", Toast.LENGTH_SHORT).show()
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097A7)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .height(60.dp)
-                .width(200.dp)
+                .fillMaxWidth(0.6f)
         ) {
-            Text("Change Background Color", fontSize = 18.sp, color = Color.White)
+            Text(
+                text = "Change Background Color",
+                fontSize = 18.sp,
+                color = Color.White
+            )
         }
     }
 }
 
 @Composable
-fun NextScreen(userName: String, userAge: String = "", userHobby: String = "") {
+fun NextScreen(name: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFD1C4E9))
-            .padding(24.dp),
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Welcome, $userName!",
-            fontSize = 28.sp,
+            text = "Welcome, $name!",
+            fontSize = 26.sp,
             color = Color(0xFF311B92)
         )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (userAge.isNotBlank()) {
-            Text(
-                "Age: $userAge",
-                fontSize = 20.sp,
-                color = Color(0xFF512DA8),
-                lineHeight = 24.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        if (userHobby.isNotBlank()) {
-            Text(
-                "Hobby: $userHobby",
-                fontSize = 20.sp,
-                color = Color(0xFF512DA8),
-                lineHeight = 24.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            "You can add more features here next week.",
+            text = "You can add more features here next week.",
             fontSize = 18.sp,
             color = Color(0xFF512DA8),
             lineHeight = 24.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-
         Text(
-            "Thank you for checking out my Week 2 progress!",
+            text = "Thank you for checking out my Week 2 progress!",
             fontSize = 16.sp,
             color = Color(0xFF673AB7)
         )
     }
 }
-
