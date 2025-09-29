@@ -1,195 +1,123 @@
-package com.cb.capstoneapp
+package com.example.myapp
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var showNext by remember { mutableStateOf(false) }
-            var userName by remember { mutableStateOf("") }
-
-            if (!showNext) {
-                WelcomeScreen(
-                    onClickNext = { name ->
-                        userName = name
-                        showNext = true
-                    }
-                )
-            } else {
-                NextScreen(userName)
-            }
+            MyApp()
         }
     }
 }
 
 @Composable
-fun WelcomeScreen(onClickNext: (String) -> Unit) {
-    var bgColor by remember { mutableStateOf(Color(0xFFEDE7F6)) }
-    val context = LocalContext.current
-    var userName by remember { mutableStateOf("") }
-    val colors = listOf(
-        Color(0xFFEDE7F6),
-        Color(0xFFC5CAE9),
-        Color(0xFFB3E5FC),
-        Color(0xFFFFF59D),
-        Color(0xFFFFAB91)
-    )
+fun MyApp() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "welcome") {
+        composable("welcome") { WelcomeScreen(navController) }
+        composable("aboutMe/{userName}") { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("userName") ?: ""
+            AboutMeScreen(name)
+        }
+    }
+}
+
+@Composable
+fun WelcomeScreen(navController: NavHostController) {
+    var name by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableStateOf(0) }
+    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+    val currentColor = colors[colorIndex % colors.size]
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor)
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(currentColor)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Welcome to My Capstone App",
-            fontSize = 30.sp,
-            color = Color(0xFF4A148C)
-        )
-        Spacer(modifier = Modifier.height(24.dp))
+        Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
 
-        TextField(
-            value = userName,
-            onValueChange = { userName = it },
+        Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = {
+                name = it
+                showError = false
+            },
             label = { Text("Enter your name") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
-        Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = { onClickNext(userName) },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .height(60.dp)
-                .fillMaxWidth(0.6f)
-        ) {
+        if (showError) {
             Text(
-                text = "Next Page",
-                fontSize = 18.sp,
-                color = Color.White
+                text = "Name cannot be empty!",
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 5.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
-                colorIndex = (colorIndex + 1) % colors.size
-                bgColor = colors[colorIndex]
-                Toast.makeText(context, "Background changed!", Toast.LENGTH_SHORT).show()
+                if (name.isBlank()) {
+                    showError = true
+                } else {
+                    navController.navigate("aboutMe/$name")
+                }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097A7)),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .height(60.dp)
-                .fillMaxWidth(0.6f)
+            modifier = Modifier.fillMaxWidth(0.5f)
         ) {
-            Text(
-                text = "Change Background Color",
-                fontSize = 18.sp,
-                color = Color.White
-            )
+            Text("Next Page")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Button(
+            onClick = { colorIndex++ },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text("Change Background")
         }
     }
 }
 
 @Composable
-fun NextScreen(name: String) {
-    var apiData by remember { mutableStateOf("No data loaded yet.") }
-
+fun AboutMeScreen(userName: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFD1C4E9))
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .background(Color(0xFFFAFAFA))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Welcome, $name!",
-            fontSize = 26.sp,
-            color = Color(0xFF311B92)
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // About Me section
-        Text(
-            text = "About Me",
-            fontSize = 22.sp,
-            color = Color(0xFF512DA8)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = "This is my Capstone project where I’m learning Android development with Jetpack Compose. " +
-                    "I enjoy coding, experimenting with UI layouts, and exploring new technologies. " +
-                    "This app is a way to practice and demonstrate those skills while building something from scratch.",
-            fontSize = 16.sp,
-            color = Color(0xFF4A148C),
-            lineHeight = 22.sp
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // API Placeholder Section
-        Button(
-            onClick = {
-                // Fake API response
-                apiData = """
-                    {
-                      "id": 1,
-                      "title": "Hello World",
-                      "body": "This is a fake API response for now."
-                    }
-                """.trimIndent()
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3949AB)),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth(0.7f)
-        ) {
-            Text(
-                text = "Load Data from API",
-                fontSize = 16.sp,
-                color = Color.White
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = apiData,
-            fontSize = 14.sp,
-            color = Color.Black,
-            lineHeight = 20.sp
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Thank you for checking out my Week 2 progress!",
-            fontSize = 16.sp,
-            color = Color(0xFF673AB7)
-        )
+        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("Hello, $userName!", fontSize = 22.sp)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("This is the About Me page.", fontSize = 18.sp)
     }
 }
