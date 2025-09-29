@@ -116,6 +116,8 @@ fun WelcomeScreen(onClickNext: (String) -> Unit) {
 
 @Composable
 fun NextScreen(name: String) {
+    var apiData by remember { mutableStateOf("No data loaded yet.") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -146,6 +148,42 @@ fun NextScreen(name: String) {
             color = Color(0xFF4A148C),
             lineHeight = 22.sp
         )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // API Placeholder Section
+        Button(
+            onClick = {
+                // Fake API response
+                apiData = """
+                    {
+                      "id": 1,
+                      "title": "Hello World",
+                      "body": "This is a fake API response for now."
+                    }
+                """.trimIndent()
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3949AB)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(0.7f)
+        ) {
+            Text(
+                text = "Load Data from API",
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = apiData,
+            fontSize = 14.sp,
+            color = Color.Black,
+            lineHeight = 20.sp
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
