@@ -55,13 +55,13 @@ fun WelcomeScreen(onClickNext: (String) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(bgColor)
-            .padding(32.dp), // polished spacing
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Welcome to My Capstone App",
-            fontSize = 30.sp, // polished font size
+            fontSize = 30.sp,
             color = Color(0xFF4A148C)
         )
         Spacer(modifier = Modifier.height(24.dp))
@@ -76,14 +76,13 @@ fun WelcomeScreen(onClickNext: (String) -> Unit) {
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Next Page button
         Button(
             onClick = { onClickNext(userName) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .height(60.dp)
-                .fillMaxWidth(0.6f) // consistent button width
+                .fillMaxWidth(0.6f)
         ) {
             Text(
                 text = "Next Page",
@@ -94,7 +93,6 @@ fun WelcomeScreen(onClickNext: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Background color button
         Button(
             onClick = {
                 colorIndex = (colorIndex + 1) % colors.size
@@ -124,21 +122,32 @@ fun NextScreen(name: String) {
             .background(Color(0xFFD1C4E9))
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = "Welcome, $name!",
             fontSize = 26.sp,
             color = Color(0xFF311B92)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // About Me section
         Text(
-            text = "You can add more features here next week.",
-            fontSize = 18.sp,
-            color = Color(0xFF512DA8),
-            lineHeight = 24.sp
+            text = "About Me",
+            fontSize = 22.sp,
+            color = Color(0xFF512DA8)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "This is my Capstone project where I’m learning Android development with Jetpack Compose. " +
+                    "I enjoy coding, experimenting with UI layouts, and exploring new technologies. " +
+                    "This app is a way to practice and demonstrate those skills while building something from scratch.",
+            fontSize = 16.sp,
+            color = Color(0xFF4A148C),
+            lineHeight = 22.sp
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
         Text(
             text = "Thank you for checking out my Week 2 progress!",
             fontSize = 16.sp,
