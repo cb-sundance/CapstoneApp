@@ -1,6 +1,7 @@
 package com.example.myapp
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +59,6 @@ fun WelcomeScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
@@ -107,6 +108,8 @@ fun WelcomeScreen(navController: NavHostController) {
 
 @Composable
 fun AboutMeScreen(userName: String, navController: NavHostController) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -122,13 +125,23 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
         Text("This is the About Me page.", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Back button
         Button(
             onClick = { navController.popBackStack() },
             modifier = Modifier.fillMaxWidth(0.5f)
         ) {
             Text("Back")
         }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // New button for Commit 8
+        Button(
+            onClick = {
+                Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text("Greet Me")
+        }
     }
 }
-
