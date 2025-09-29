@@ -1,18 +1,15 @@
 package com.example.myapp
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,7 +34,7 @@ fun MyApp() {
         composable("welcome") { WelcomeScreen(navController) }
         composable("aboutMe/{userName}") { backStackEntry ->
             val name = backStackEntry.arguments?.getString("userName") ?: ""
-            AboutMeScreen(name)
+            AboutMeScreen(userName = name)
         }
     }
 }
@@ -47,30 +44,20 @@ fun WelcomeScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableStateOf(0) }
-
-    val colors = listOf(
-        Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4),
-        Color(0xFFFFCDD2), Color(0xFFD1C4E9), Color(0xFFFFE0B2)
-    )
+    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
     val currentColor = colors[colorIndex % colors.size]
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(currentColor)
-            .padding(24.dp),
+            .padding(20.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            "Welcome!",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF311B92)
-        )
+        Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
 
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
             value = name,
@@ -79,9 +66,7 @@ fun WelcomeScreen(navController: NavHostController) {
                 showError = false
             },
             label = { Text("Enter your name") },
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
 
         if (showError) {
@@ -100,82 +85,52 @@ fun WelcomeScreen(navController: NavHostController) {
                 if (name.isBlank()) {
                     showError = true
                 } else {
-                    Toast.makeText(context, "Navigating to About Me!", Toast.LENGTH_SHORT).show()
                     navController.navigate("aboutMe/$name")
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .height(55.dp),
-            shape = RoundedCornerShape(12.dp)
+            modifier = Modifier.fillMaxWidth(0.5f)
         ) {
-            Text("Next Page", fontSize = 18.sp)
+            Text("Next Page")
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
         Button(
             onClick = { colorIndex++ },
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .height(55.dp),
-            shape = RoundedCornerShape(12.dp)
+            modifier = Modifier.fillMaxWidth(0.5f)
         ) {
-            Text("Change Background", fontSize = 18.sp)
+            Text("Change Background")
         }
     }
 }
 
 @Composable
 fun AboutMeScreen(userName: String) {
+    var isDarkMode by remember { mutableStateOf(false) }
+    val bgColor = if (isDarkMode) Color(0xFF212121) else Color(0xFFFAFAFA)
+    val textColor = if (isDarkMode) Color.White else Color.Black
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAFAFA))
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Top,
+            .background(bgColor)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            "About Me",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF311B92)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            "Hello, $userName!",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
-        )
-
+        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = textColor)
         Spacer(modifier = Modifier.height(15.dp))
-
-        Text(
-            "I am currently working on my Android app for my Capstone project. "
-                    + "This About Me screen shows basic navigation, dynamic data handling, "
-                    + "and now a polished layout with consistent padding, spacing, and colors.",
-            fontSize = 18.sp,
-            lineHeight = 24.sp
-        )
-
+        Text("Hello, $userName!", fontSize = 22.sp, color = textColor)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("This is the About Me page.", fontSize = 18.sp, color = textColor)
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Hobbies Section
-        Text(
-            "My Hobbies & Interests",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF512DA8)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        val hobbies = listOf("Reading", "Coding", "Gaming", "Hiking", "Music")
-        hobbies.forEach { hobby ->
-            Text("• $hobby", fontSize = 18.sp, modifier = Modifier.padding(vertical = 2.dp))
+        // Settings / Dark Mode toggle
+        Button(
+            onClick = { isDarkMode = !isDarkMode },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text(if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode")
         }
     }
 }
