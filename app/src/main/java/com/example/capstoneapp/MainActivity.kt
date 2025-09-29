@@ -76,9 +76,15 @@ fun WelcomeScreen(
 
         TextField(
             value = userAge,
-            onValueChange = onAgeChange,
-            label = { Text("Enter your age") },
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = { input ->
+                // Only allow digits
+                if (input.all { it.isDigit() }) {
+                    onAgeChange(input)
+                }
+            },
+            label = { Text("Enter your age (numbers only)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -101,6 +107,7 @@ fun WelcomeScreen(
                 errorMessage = when {
                     userName.isBlank() -> "Please enter your name."
                     userAge.isBlank() -> "Please enter your age."
+                    userAge.toIntOrNull() == null -> "Age must be a number."
                     userHobby.isBlank() -> "Please enter your hobby."
                     else -> {
                         onClickNext()
