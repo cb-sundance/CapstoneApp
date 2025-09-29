@@ -22,27 +22,36 @@ class MainActivity : ComponentActivity() {
         setContent {
             var showNext by remember { mutableStateOf(false) }
             var userName by remember { mutableStateOf("") }
+            var userAge by remember { mutableStateOf("") }
+            var userHobby by remember { mutableStateOf("") }
 
             if (!showNext) {
-                WelcomeScreen(
-                    onClickNext = { name ->
-                        userName = name
-                        showNext = true
-                    }
-                )
+                WelcomeScreen { name, age, hobby ->
+                    userName = name
+                    userAge = age
+                    userHobby = hobby
+                    showNext = true
+                }
             } else {
-                NextScreen(userName)
+                NextScreen(userName, userAge, userHobby)
             }
         }
     }
 }
 
 @Composable
-fun WelcomeScreen(onClickNext: (String) -> Unit) {
+fun WelcomeScreen(onClickNext: (String, String, String) -> Unit) {
     // Track background color
     var bgColor by remember { mutableStateOf(Color(0xFFEDE7F6)) }
     val context = LocalContext.current // for Toast
+
+    // Track user input
     var userName by remember { mutableStateOf("") }
+    var userAge by remember { mutableStateOf("") }
+    var userHobby by remember { mutableStateOf("") }
+
+    // Track validation error
+    var showError by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -59,18 +68,51 @@ fun WelcomeScreen(onClickNext: (String) -> Unit) {
         )
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Input field
+        // Name input
         TextField(
             value = userName,
             onValueChange = { userName = it },
             label = { Text("Enter your name") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Age input
+        TextField(
+            value = userAge,
+            onValueChange = { userAge = it },
+            label = { Text("Enter your age") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Hobby input
+        TextField(
+            value = userHobby,
+            onValueChange = { userHobby = it },
+            label = { Text("Enter your hobby") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(20.dp))
+
+        if (showError) {
+            Text(
+                text = "Please fill out all fields!",
+                color = Color.Red,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         // Button 1: Next Screen
         Button(
-            onClick = { onClickNext(userName) },
+            onClick = {
+                if (userName.isNotBlank() && userAge.isNotBlank() && userHobby.isNotBlank()) {
+                    onClickNext(userName, userAge, userHobby)
+                } else {
+                    showError = true
+                }
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -118,7 +160,7 @@ fun WelcomeScreen(onClickNext: (String) -> Unit) {
 }
 
 @Composable
-fun NextScreen(name: String) {
+fun NextScreen(name: String, age: String, hobby: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -134,15 +176,20 @@ fun NextScreen(name: String) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "You can add more features here next week.",
-            fontSize = 18.sp,
-            color = Color(0xFF512DA8),
-            lineHeight = 24.sp
+            text = "Age: $age",
+            fontSize = 20.sp,
+            color = Color(0xFF512DA8)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Thank you for checking out my Week 1 progress!",
-            fontSize = 16.sp,
+            text = "Hobby: $hobby",
+            fontSize = 20.sp,
+            color = Color(0xFF512DA8)
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Thank you for checking out my Week 2 progress!",
+            fontSize = 16,sp,
             color = Color(0xFF673AB7)
         )
     }
