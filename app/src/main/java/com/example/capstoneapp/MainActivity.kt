@@ -8,8 +8,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +39,7 @@ fun MyApp() {
             val name = backStackEntry.arguments?.getString("userName") ?: ""
             AboutMeScreen(name, navController)
         }
-        composable("funFacts") { FunFactsScreen(navController) } // Commit 10 new screen
+        composable("funFacts") { FunFactsScreen(navController) }
     }
 }
 
@@ -153,13 +151,10 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        // Button to navigate to Fun Facts with standard icon
         Button(
             onClick = { navController.navigate("funFacts") },
             modifier = Modifier.fillMaxWidth(0.5f)
         ) {
-            Icon(Icons.Filled.Info, contentDescription = "Fun Icon")
-            Spacer(modifier = Modifier.width(5.dp))
             Text("Fun Facts")
         }
     }
@@ -192,4 +187,3 @@ fun FunFactsScreen(navController: NavHostController) {
         }
     }
 }
-
