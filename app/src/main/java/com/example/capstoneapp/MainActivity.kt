@@ -172,11 +172,11 @@ fun FunFactsScreen(navController: NavHostController) {
     ) {
         Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(15.dp))
-        Text("• I love gaming and the process behind making them!", fontSize = 18.sp)
+        Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
         Spacer(modifier = Modifier.height(10.dp))
-        Text("• My favorite color is yellow, but not to wear", fontSize = 18.sp)
+        Text("• My favorite color is yellow, but not to wear", fontSize = 17.sp)
         Spacer(modifier = Modifier.height(10.dp))
-        Text("• I enjoy learning new tech.", fontSize = 18.sp)
+        Text("• I enjoy learning new tech.", fontSize = 17.sp)
         Spacer(modifier = Modifier.height(30.dp))
 
         Button(
