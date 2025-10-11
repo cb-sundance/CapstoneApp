@@ -51,6 +51,7 @@ fun WelcomeScreen(navController: NavHostController) {
     val colors = listOf(
         Color(0xFFBBDEFB),
         Color(0xFFC8E6C9),
+        Color(0xFFE91E63),
         Color(0xFFFFF9C4),
         Color(0xFFFFCDD2)
     )
