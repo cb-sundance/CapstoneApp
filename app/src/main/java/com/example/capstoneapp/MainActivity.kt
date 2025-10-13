@@ -7,6 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,9 +20,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
@@ -33,20 +40,82 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = "welcome") {
-        composable("welcome") { WelcomeScreen(navController) }
-        composable("aboutMe/{userName}") { backStackEntry ->
-            val name = backStackEntry.arguments?.getString("userName") ?: ""
-            AboutMeScreen(name, navController)
+    val userName = remember { mutableStateOf("") }
+
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(navController, userName.value)
         }
-        composable("funFacts") { FunFactsScreen(navController) }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = "welcome",
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable("welcome") { WelcomeScreen(navController, userName) }
+            composable("aboutMe") { AboutMeScreen(userName.value, navController) }
+            composable("funFacts") { FunFactsScreen(navController) }
+        }
     }
+}
+
+data class BottomNavItem(
+    val route: String,
+    val label: String,
+    val icon: @Composable () -> Unit
+)
+
+@Composable
+fun BottomNavBar(navController: NavHostController, userName: String) {
+    val items = listOf(
+        BottomNavItem("welcome", "Welcome") { Icon(Icons.Filled.Home, contentDescription = null) },
+        BottomNavItem("aboutMe", "About Me") { Icon(Icons.Filled.Info, contentDescription = null) },
+        BottomNavItem("funFacts", "Fun Facts") { Icon(Icons.Filled.Face, contentDescription = null) }
+    )
+
+    NavigationBar(
+        containerColor = Color(0xFF1976D2)
+    ) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+
+        items.forEach { item ->
+            NavigationBarItem(
+                selected = currentDestination.isRouteActive(item.route),
+                onClick = {
+                    // Prevent About Me navigation if username is empty
+                    if (item.route == "aboutMe" && userName.isBlank()) return@NavigationBarItem
+
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                icon = { item.icon() },
+                label = { Text(item.label) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.White,
+                    selectedTextColor = Color.White,
+                    unselectedIconColor = Color.White.copy(alpha = 0.7f),
+                    unselectedTextColor = Color.White.copy(alpha = 0.7f),
+                    indicatorColor = Color(0xFF0D47A1)
+                )
+            )
+        }
+    }
+}
+
+private fun NavDestination?.isRouteActive(route: String): Boolean {
+    return this?.route == route
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WelcomeScreen(navController: NavHostController) {
-    var name by remember { mutableStateOf("") }
+fun WelcomeScreen(navController: NavHostController, userName: MutableState<String>) {
+    var name by remember { mutableStateOf(userName.value) }
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableIntStateOf(0) }
     val colors = listOf(
@@ -85,6 +154,7 @@ fun WelcomeScreen(navController: NavHostController) {
                 value = name,
                 onValueChange = {
                     name = it
+                    userName.value = it
                     showError = false
                 },
                 label = { Text("Enter your name") },
@@ -107,7 +177,8 @@ fun WelcomeScreen(navController: NavHostController) {
                     if (name.isBlank()) {
                         showError = true
                     } else {
-                        navController.navigate("aboutMe/$name")
+                        userName.value = name
+                        navController.navigate("aboutMe")
                     }
                 },
                 modifier = Modifier.fillMaxWidth(0.5f)
@@ -160,30 +231,12 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text("Back")
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Button(
                 onClick = {
                     Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) {
                 Text("Greet Me")
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Button(
-                onClick = { navController.navigate("funFacts") },
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text("Fun Facts")
             }
         }
     }
@@ -219,14 +272,6 @@ fun FunFactsScreen(navController: NavHostController) {
             Text("• My favorite color is yellow, but not to wear", fontSize = 17.sp)
             Spacer(modifier = Modifier.height(10.dp))
             Text("• I enjoy learning new tech.", fontSize = 17.sp)
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text("Back")
-            }
         }
     }
 }
