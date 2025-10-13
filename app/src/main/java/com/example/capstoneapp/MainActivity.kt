@@ -21,10 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,12 +40,10 @@ fun MyApp() {
 
     val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFFFFFF)
     val topBarColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)
-    val textColor = if (isDarkMode) Color.White else Color.White
 
     Scaffold(
-        bottomBar = {
-            BottomNavBar(navController, userName.value)
-        }
+        bottomBar = { BottomNavBar(navController, userName.value) },
+        containerColor = backgroundColor
     ) { paddingValues ->
         NavHost(
             navController = navController,
@@ -117,9 +112,9 @@ fun WelcomeScreen(
     isDarkMode: Boolean,
     topBarColor: Color
 ) {
-    var name by remember { mutableStateOf(userName.value) }
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableIntStateOf(0) }
+
     val colors = if (isDarkMode) {
         listOf(Color(0xFF1F1F1F), Color(0xFF2E2E2E), Color(0xFF3E3E3E))
     } else {
@@ -131,19 +126,14 @@ fun WelcomeScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Welcome Screen") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
-                actions = {
-                    IconButton(onClick = { isDarkMode = !isDarkMode }) {
-                        Icon(Icons.Filled.Brightness6, contentDescription = "Toggle Dark/Light Mode", tint = Color.White)
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
             )
-        }
+        },
+        containerColor = currentColor
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(currentColor)
                 .padding(paddingValues)
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center,
@@ -153,9 +143,8 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             OutlinedTextField(
-                value = name,
+                value = userName.value,
                 onValueChange = {
-                    name = it
                     userName.value = it
                     showError = false
                 },
@@ -171,7 +160,7 @@ fun WelcomeScreen(
 
             Button(
                 onClick = {
-                    if (name.isBlank()) showError = true else navController.navigate("aboutMe")
+                    if (userName.value.isBlank()) showError = true else navController.navigate("aboutMe")
                 },
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) {
@@ -199,12 +188,7 @@ fun AboutMeScreen(userName: String, navController: NavHostController, isDarkMode
         topBar = {
             TopAppBar(
                 title = { Text("About Me") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
-                actions = {
-                    IconButton(onClick = { /* Toggle dark/light could be lifted to parent */ }) {
-                        Icon(Icons.Filled.Brightness6, contentDescription = "Toggle Dark/Light Mode", tint = Color.White)
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
             )
         }
     ) { paddingValues ->
@@ -241,12 +225,7 @@ fun FunFactsScreen(navController: NavHostController, isDarkMode: Boolean, topBar
         topBar = {
             TopAppBar(
                 title = { Text("Fun Facts") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
-                actions = {
-                    IconButton(onClick = { /* Toggle dark/light could be lifted to parent */ }) {
-                        Icon(Icons.Filled.Brightness6, contentDescription = "Toggle Dark/Light Mode", tint = Color.White)
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
             )
         }
     ) { paddingValues ->
