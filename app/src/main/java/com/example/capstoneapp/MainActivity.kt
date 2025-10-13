@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,16 +33,97 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = "welcome") {
-        composable("welcome") { WelcomeScreen(navController) }
-        composable("aboutMe/{userName}") { backStackEntry ->
-            val name = backStackEntry.arguments?.getString("userName") ?: ""
-            AboutMeScreen(name, navController)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text(
+                    text = "Menu",
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Home") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("welcome") {
+                            popUpTo("welcome") { inclusive = true }
+                        }
+                        scope.launch { drawerState.close() }
+                    }
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("About Me") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("aboutMe/Guest")
+                        scope.launch { drawerState.close() }
+                    }
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Fun Facts") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("funFacts")
+                        scope.launch { drawerState.close() }
+                    }
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        Toast.makeText(LocalContext.current, "Settings clicked", Toast.LENGTH_SHORT).show()
+                        scope.launch { drawerState.close() }
+                    }
+                )
+            }
         }
-        composable("funFacts") { FunFactsScreen(navController) }
+    ) {
+        MainAppContent(navController, drawerState)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainAppContent(navController: NavHostController, drawerState: DrawerState) {
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Capstone App") },
+                navigationIcon = {
+                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        NavHost(
+            navController,
+            startDestination = "welcome",
+            modifier = Modifier.padding(padding)
+        ) {
+            composable("welcome") { WelcomeScreen(navController) }
+            composable("aboutMe/{userName}") { backStackEntry ->
+                val name = backStackEntry.arguments?.getString("userName") ?: ""
+                AboutMeScreen(name, navController)
+            }
+            composable("funFacts") { FunFactsScreen(navController) }
+        }
     }
 }
 
