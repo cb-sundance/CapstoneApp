@@ -8,9 +8,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +39,11 @@ class MainActivity : ComponentActivity() {
 fun MyApp() {
     val navController = rememberNavController()
     val userName = remember { mutableStateOf("") }
+    var isDarkMode by remember { mutableStateOf(false) }
+
+    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFFFFFF)
+    val topBarColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)
+    val textColor = if (isDarkMode) Color.White else Color.White
 
     Scaffold(
         bottomBar = {
@@ -52,9 +55,9 @@ fun MyApp() {
             startDestination = "welcome",
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable("welcome") { WelcomeScreen(navController, userName) }
-            composable("aboutMe") { AboutMeScreen(userName.value, navController) }
-            composable("funFacts") { FunFactsScreen(navController) }
+            composable("welcome") { WelcomeScreen(navController, userName, isDarkMode, topBarColor) }
+            composable("aboutMe") { AboutMeScreen(userName.value, navController, isDarkMode, topBarColor) }
+            composable("funFacts") { FunFactsScreen(navController, isDarkMode, topBarColor) }
         }
     }
 }
@@ -73,9 +76,7 @@ fun BottomNavBar(navController: NavHostController, userName: String) {
         BottomNavItem("funFacts", "Fun Facts") { Icon(Icons.Filled.Face, contentDescription = null) }
     )
 
-    NavigationBar(
-        containerColor = Color(0xFF1976D2)
-    ) {
+    NavigationBar(containerColor = Color(0xFF1976D2)) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
 
@@ -83,13 +84,9 @@ fun BottomNavBar(navController: NavHostController, userName: String) {
             NavigationBarItem(
                 selected = currentDestination.isRouteActive(item.route),
                 onClick = {
-                    // Prevent About Me navigation if username is empty
                     if (item.route == "aboutMe" && userName.isBlank()) return@NavigationBarItem
-
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -114,27 +111,32 @@ private fun NavDestination?.isRouteActive(route: String): Boolean {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WelcomeScreen(navController: NavHostController, userName: MutableState<String>) {
+fun WelcomeScreen(
+    navController: NavHostController,
+    userName: MutableState<String>,
+    isDarkMode: Boolean,
+    topBarColor: Color
+) {
     var name by remember { mutableStateOf(userName.value) }
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableIntStateOf(0) }
-    val colors = listOf(
-        Color(0xFFBBDEFB),
-        Color(0xFFC8E6C9),
-        Color(0xFFE91E63),
-        Color(0xFFFFF9C4),
-        Color(0xFFFFCDD2)
-    )
+    val colors = if (isDarkMode) {
+        listOf(Color(0xFF1F1F1F), Color(0xFF2E2E2E), Color(0xFF3E3E3E))
+    } else {
+        listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFE91E63), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+    }
     val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Welcome Screen") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1976D2),
-                    titleContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                actions = {
+                    IconButton(onClick = { isDarkMode = !isDarkMode }) {
+                        Icon(Icons.Filled.Brightness6, contentDescription = "Toggle Dark/Light Mode", tint = Color.White)
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -162,24 +164,14 @@ fun WelcomeScreen(navController: NavHostController, userName: MutableState<Strin
             )
 
             if (showError) {
-                Text(
-                    text = "Name cannot be empty!",
-                    color = Color.Red,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 5.dp)
-                )
+                Text("Name cannot be empty!", color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp))
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = {
-                    if (name.isBlank()) {
-                        showError = true
-                    } else {
-                        userName.value = name
-                        navController.navigate("aboutMe")
-                    }
+                    if (name.isBlank()) showError = true else navController.navigate("aboutMe")
                 },
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) {
@@ -200,24 +192,26 @@ fun WelcomeScreen(navController: NavHostController, userName: MutableState<Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutMeScreen(userName: String, navController: NavHostController) {
+fun AboutMeScreen(userName: String, navController: NavHostController, isDarkMode: Boolean, topBarColor: Color) {
     val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("About Me") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1976D2),
-                    titleContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                actions = {
+                    IconButton(onClick = { /* Toggle dark/light could be lifted to parent */ }) {
+                        Icon(Icons.Filled.Brightness6, contentDescription = "Toggle Dark/Light Mode", tint = Color.White)
+                    }
+                }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFFAFAFA))
+                .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFFAFAFA))
                 .padding(paddingValues)
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center,
@@ -231,9 +225,7 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = {
-                    Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
-                },
+                onClick = { Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show() },
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) {
                 Text("Greet Me")
@@ -244,22 +236,24 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FunFactsScreen(navController: NavHostController) {
+fun FunFactsScreen(navController: NavHostController, isDarkMode: Boolean, topBarColor: Color) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fun Facts") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1976D2),
-                    titleContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                actions = {
+                    IconButton(onClick = { /* Toggle dark/light could be lifted to parent */ }) {
+                        Icon(Icons.Filled.Brightness6, contentDescription = "Toggle Dark/Light Mode", tint = Color.White)
+                    }
+                }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFE1F5FE))
+                .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFE1F5FE))
                 .padding(paddingValues)
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center,
