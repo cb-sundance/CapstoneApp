@@ -8,7 +8,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
@@ -50,9 +53,32 @@ fun MyApp() {
             startDestination = "welcome",
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable("welcome") { WelcomeScreen(navController, userName, isDarkMode, topBarColor) }
-            composable("aboutMe") { AboutMeScreen(userName.value, navController, isDarkMode, topBarColor) }
-            composable("funFacts") { FunFactsScreen(navController, isDarkMode, topBarColor) }
+            composable("welcome") {
+                WelcomeScreen(
+                    navController = navController,
+                    userName = userName,
+                    isDarkMode = isDarkMode,
+                    topBarColor = topBarColor,
+                    toggleDarkMode = { isDarkMode = it }
+                )
+            }
+            composable("aboutMe") {
+                AboutMeScreen(
+                    userName = userName.value,
+                    navController = navController,
+                    isDarkMode = isDarkMode,
+                    topBarColor = topBarColor,
+                    toggleDarkMode = { isDarkMode = it }
+                )
+            }
+            composable("funFacts") {
+                FunFactsScreen(
+                    navController = navController,
+                    isDarkMode = isDarkMode,
+                    topBarColor = topBarColor,
+                    toggleDarkMode = { isDarkMode = it }
+                )
+            }
         }
     }
 }
@@ -110,7 +136,8 @@ fun WelcomeScreen(
     navController: NavHostController,
     userName: MutableState<String>,
     isDarkMode: Boolean,
-    topBarColor: Color
+    topBarColor: Color,
+    toggleDarkMode: (Boolean) -> Unit
 ) {
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableIntStateOf(0) }
@@ -126,7 +153,23 @@ fun WelcomeScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Welcome Screen") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
+                actions = {
+                    // Simple Switch for theme toggling (no missing icon dependency)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { toggleDarkMode(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
             )
         },
         containerColor = currentColor
@@ -181,14 +224,35 @@ fun WelcomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutMeScreen(userName: String, navController: NavHostController, isDarkMode: Boolean, topBarColor: Color) {
+fun AboutMeScreen(
+    userName: String,
+    navController: NavHostController,
+    isDarkMode: Boolean,
+    topBarColor: Color,
+    toggleDarkMode: (Boolean) -> Unit
+) {
     val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("About Me") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
+                actions = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { toggleDarkMode(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -220,12 +284,32 @@ fun AboutMeScreen(userName: String, navController: NavHostController, isDarkMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FunFactsScreen(navController: NavHostController, isDarkMode: Boolean, topBarColor: Color) {
+fun FunFactsScreen(
+    navController: NavHostController,
+    isDarkMode: Boolean,
+    topBarColor: Color,
+    toggleDarkMode: (Boolean) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fun Facts") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
+                actions = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { toggleDarkMode(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
             )
         }
     ) { paddingValues ->
