@@ -160,7 +160,6 @@ fun WelcomeScreen(
                     titleContentColor = Color.White
                 ),
                 actions = {
-                    // Simple Switch for theme toggling (no missing icon dependency)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -184,7 +183,6 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top-centered image for Welcome screen
             Image(
                 painter = painterResource(id = R.drawable.welcome_image),
                 contentDescription = "Welcome image",
@@ -276,7 +274,6 @@ fun AboutMeScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top-centered image for About Me
             Image(
                 painter = painterResource(id = R.drawable.about_image),
                 contentDescription = "About image",
@@ -342,7 +339,6 @@ fun FunFactsScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top-centered image for Fun Facts
             Image(
                 painter = painterResource(id = R.drawable.funfacts_image),
                 contentDescription = "Fun Facts image",
