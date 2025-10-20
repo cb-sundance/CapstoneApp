@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -179,9 +181,18 @@ fun WelcomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Top-centered image for Welcome screen
+            Image(
+                painter = painterResource(id = R.drawable.welcome_image),
+                contentDescription = "Welcome image",
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(bottom = 16.dp)
+            )
+
             Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -262,9 +273,18 @@ fun AboutMeScreen(
                 .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFFAFAFA))
                 .padding(paddingValues)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Top-centered image for About Me
+            Image(
+                painter = painterResource(id = R.drawable.about_image),
+                contentDescription = "About image",
+                modifier = Modifier
+                    .size(140.dp)
+                    .padding(bottom = 16.dp)
+            )
+
             Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(15.dp))
             Text("Hello, $userName!", fontSize = 22.sp)
@@ -319,9 +339,18 @@ fun FunFactsScreen(
                 .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFE1F5FE))
                 .padding(paddingValues)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Top-centered image for Fun Facts
+            Image(
+                painter = painterResource(id = R.drawable.funfacts_image),
+                contentDescription = "Fun Facts image",
+                modifier = Modifier
+                    .size(140.dp)
+                    .padding(bottom = 16.dp)
+            )
+
             Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(15.dp))
             Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
