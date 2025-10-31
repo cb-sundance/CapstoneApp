@@ -1,10 +1,10 @@
 package com.example.capstoneapp
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,20 +13,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FunFactsScreen(
     navController: NavHostController,
     isDarkMode: Boolean,
+    topBarColor: Color,
     toggleDarkMode: (Boolean) -> Unit,
-    topBarColor: Color
+    repository: PhotoRepository
 ) {
+    val scope = rememberCoroutineScope()
+    var funFact by remember { mutableStateOf("Loading...") }
+
+    // Fetch a fun fact from the repository
+    LaunchedEffect(Unit) {
+        scope.launch {
+            funFact = repository.fetchFunFact()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fun Facts") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
@@ -40,12 +55,12 @@ fun FunFactsScreen(
                     }
                 }
             )
-        }
+        },
+        containerColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFE1F5FE)
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFE1F5FE))
                 .padding(paddingValues)
                 .padding(20.dp),
             verticalArrangement = Arrangement.Top,
@@ -60,6 +75,8 @@ fun FunFactsScreen(
             )
 
             Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(15.dp))
+            Text(funFact, fontSize = 17.sp)
             Spacer(modifier = Modifier.height(15.dp))
             Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
             Spacer(modifier = Modifier.height(10.dp))
