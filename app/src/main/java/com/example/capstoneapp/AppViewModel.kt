@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 class AppViewModel(application: Application, private val dataStoreManager: DataStoreManager) :
     AndroidViewModel(application) {
 
-    // userName kept in memory (you can persist it if you add a key in DataStoreManager)
+    // userName kept in memory
     private val _userName = MutableStateFlow("")
     val userName: StateFlow<String> = _userName.asStateFlow()
 

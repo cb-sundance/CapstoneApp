@@ -29,7 +29,10 @@ fun AboutMeScreen(
         topBar = {
             TopAppBar(
                 title = { Text("About Me") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
@@ -53,7 +56,6 @@ fun AboutMeScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Add your about image in drawable folder and name it "about_image"
             Image(
                 painter = painterResource(id = R.drawable.about_image),
                 contentDescription = "About image",
@@ -69,7 +71,13 @@ fun AboutMeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { NotificationUtils.showSimpleNotification(context, "Hello", "Have a great day, $userName!") },
+                onClick = {
+                    NotificationUtils.showSimpleNotification(
+                        context,
+                        "Hello",
+                        "Have a great day, $userName!"
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) { Text("Greet Me") }
         }

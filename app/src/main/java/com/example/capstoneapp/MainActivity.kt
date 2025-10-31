@@ -30,15 +30,40 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
 
+    // Permission launcher
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission granted
+            } else {
+                // Permission denied, handle accordingly
+            }
+        }
+
+
     private lateinit var dataStoreManager: DataStoreManager
-    private val appViewModel: AppViewModel by viewModels { AppViewModelFactory(DataStoreManager(this)) }
+    private lateinit var appViewModel: AppViewModel
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dataStoreManager = DataStoreManager(this)
+
+        // Request notification permission on Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
 
         // Create notification channel
         NotificationUtils.createNotificationChannel(this)
@@ -50,12 +75,16 @@ class MainActivity : ComponentActivity() {
             .enqueueUniquePeriodicWork("capstone_notify_work", ExistingPeriodicWorkPolicy.KEEP, workRequest)
 
         // Show immediate welcome notification
-        NotificationHelper.scheduleImmediateNotification(this)
+        NotificationUtils.scheduleImmediateNotification(this)
 
         setContent {
             MyApp(appViewModel)
         }
     }
+}
+
+private fun NotificationUtils.scheduleImmediateNotification(mainActivity: MainActivity) {
+    TODO("Not yet implemented")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -10,15 +10,15 @@ class SyncWorker(
 ) : Worker(context, params) {
 
     override fun doWork(): Result {
-        // Example background task: send a daily notification
+        // Send daily notification
         NotificationUtils.showSimpleNotification(
             applicationContext,
             "Daily Reminder",
             "Don't forget to check your Capstone App today!"
         )
 
-        // Return success
         return Result.success()
     }
 }
+
 

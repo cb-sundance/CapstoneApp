@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-permission
         android:name="android.permission.POST_NOTIFICATIONS"
         tools:targetApi="33" />
@@ -18,7 +17,6 @@
         <meta-data
             android:name="com.google.android.datastore"
             android:value="true" />
-        <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
