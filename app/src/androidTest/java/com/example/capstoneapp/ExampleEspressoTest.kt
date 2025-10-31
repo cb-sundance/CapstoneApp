@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package com.example.capstoneapp
+=======
+package your.package.name
+>>>>>>> eb5e9b5a92e3c530cf369203c5bafa8749075ab0
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,11 +93,22 @@ private fun NotificationUtils.scheduleImmediateNotification(mainActivity: MainAc
 @Composable
 fun MyApp(viewModel: AppViewModel) {
     val navController = rememberNavController()
-    val userName by viewModel.userName.collectAsState()
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
+    NavHost(navController, startDestination = "welcome") {
+        composable("welcome") { WelcomeScreen(navController) }
+        composable("aboutMe/{userName}") { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("userName") ?: ""
+            AboutMeScreen(name, navController)
+        }
+    }
+}
 
-    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFFFFFF)
-    val topBarColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)
+@Composable
+fun WelcomeScreen(navController: NavHostController) {
+    var name by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
+    var colorIndex by remember { mutableStateOf(0) }
+    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+    val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
     Scaffold(
         bottomBar = { BottomNavBar(navController, userName) },
@@ -145,38 +158,81 @@ data class BottomNavItem(
 )
 
 @Composable
-fun BottomNavBar(navController: NavHostController, userName: String) {
-    val items = listOf(
-        BottomNavItem("welcome", "Welcome") { Icon(Icons.Filled.Home, contentDescription = null) },
-        BottomNavItem("aboutMe", "About Me") { Icon(Icons.Filled.Info, contentDescription = null) },
-        BottomNavItem("funFacts", "Fun Facts") { Icon(Icons.Filled.Face, contentDescription = null) }
-    )
+fun AboutMeScreen(userName: String, navController: NavHostController) {
+    val context = LocalContext.current
 
-    NavigationBar(containerColor = Color(0xFF1976D2)) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFAFAFA))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("Hello, $userName!", fontSize = 22.sp)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("This is the About Me page.", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(30.dp))
 
-        items.forEach { item ->
-            NavigationBarItem(
-                selected = currentDestination.isRouteActive(item.route),
-                onClick = {
-                    if (item.route == "aboutMe" && userName.isBlank()) return@NavigationBarItem
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                icon = { item.icon() },
-                label = { Text(item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    unselectedIconColor = Color.White.copy(alpha = 0.7f),
-                    unselectedTextColor = Color.White.copy(alpha = 0.7f),
-                    indicatorColor = Color(0xFF0D47A1)
-                )
-            )
+        Button(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text("Back")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // New button for Commit 8
+        Button(
+            onClick = {
+                Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text("Greet Me")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // Button to navigate to Fun Facts with standard icon
+        Button(
+            onClick = { navController.navigate("funFacts") },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Icon(Icons.Filled.Info, contentDescription = "Fun Icon")
+            Spacer(modifier = Modifier.width(5.dp))
+            Text("Fun Facts")
+        }
+    }
+}
+
+@Composable
+fun FunFactsScreen(navController: NavHostController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFE1F5FE))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("• I love gaming and the process behind making them!", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text("• My favorite color is yellow, but not to wear", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text("• I enjoy learning new tech.", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Button(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text("Back")
         }
     }
 }
