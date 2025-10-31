@@ -1,42 +1,37 @@
 package com.example.capstoneapp
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class AppViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
 
-    val isDarkMode: StateFlow<Boolean> = dataStoreManager.darkModeFlow
-        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+    private val _userName = MutableStateFlow("")
+    val userName: StateFlow<String> = _userName
 
-    val userName: StateFlow<String> = dataStoreManager.userNameFlow
-        .stateIn(viewModelScope, SharingStarted.Lazily, "")
+    private val _isDarkMode = MutableStateFlow(false)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode
 
-    fun setDarkMode(enabled: Boolean) {
+    init {
+        // Observe dark mode from DataStore
         viewModelScope.launch {
-            dataStoreManager.setDarkMode(enabled)
+            dataStoreManager.darkModeFlow.collect { enabled ->
+                _isDarkMode.value = enabled
+            }
         }
     }
 
     fun setUserName(name: String) {
-        viewModelScope.launch {
-            dataStoreManager.setUserName(name)
-        }
+        _userName.value = name
     }
-}
 
-class AppViewModelFactory(private val dataStoreManager: DataStoreManager) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AppViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AppViewModel(dataStoreManager) as T
+    fun setDarkMode(enabled: Boolean) {
+        _isDarkMode.value = enabled
+        viewModelScope.launch {
+            dataStoreManager.setDarkMode(enabled)
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
