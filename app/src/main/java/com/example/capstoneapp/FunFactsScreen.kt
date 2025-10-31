@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,11 +18,10 @@ import androidx.navigation.NavHostController
 @Composable
 fun FunFactsScreen(
     navController: NavHostController,
-    viewModel: AppViewModel,
+    isDarkMode: Boolean,
+    toggleDarkMode: (Boolean) -> Unit,
     topBarColor: Color
 ) {
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -38,7 +36,7 @@ fun FunFactsScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
-                            onCheckedChange = { viewModel.setDarkMode(it) },
+                            onCheckedChange = toggleDarkMode,
                             colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -66,11 +64,15 @@ fun FunFactsScreen(
 
             Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(15.dp))
+
+            // Replace these fun facts with your own
             Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
             Spacer(modifier = Modifier.height(10.dp))
             Text("• My favorite color is yellow, but not to wear", fontSize = 17.sp)
             Spacer(modifier = Modifier.height(10.dp))
             Text("• I enjoy learning new tech.", fontSize = 17.sp)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("• I like creating Android apps and seeing them come to life!", fontSize = 17.sp)
         }
     }
 }

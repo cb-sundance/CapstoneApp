@@ -2,15 +2,14 @@ package com.example.capstoneapp
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +50,7 @@ fun WelcomeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
-                            onCheckedChange = { toggleDarkMode(it) },
+                            onCheckedChange = toggleDarkMode,
                             colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -87,7 +86,6 @@ fun WelcomeScreen(
                     showError = false
                 },
                 label = { Text("Enter your name") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 

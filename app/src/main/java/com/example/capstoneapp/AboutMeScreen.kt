@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,13 +19,13 @@ import androidx.navigation.NavHostController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutMeScreen(
+    userName: String,
     navController: NavHostController,
-    viewModel: AppViewModel,
+    isDarkMode: Boolean,
+    toggleDarkMode: (Boolean) -> Unit,
     topBarColor: Color
 ) {
     val context = LocalContext.current
-    val userName by viewModel.userName.collectAsState()
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     Scaffold(
         topBar = {
@@ -42,7 +41,7 @@ fun AboutMeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
-                            onCheckedChange = { viewModel.setDarkMode(it) },
+                            onCheckedChange = toggleDarkMode,
                             colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -72,7 +71,7 @@ fun AboutMeScreen(
             Spacer(modifier = Modifier.height(15.dp))
             Text("Hello, $userName!", fontSize = 22.sp)
             Spacer(modifier = Modifier.height(15.dp))
-            Text("This is the About Me page.", fontSize = 18.sp)
+            Text("This is the About Me page. You can describe yourself here, your interests, or any other info you'd like to share.", fontSize = 18.sp)
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
