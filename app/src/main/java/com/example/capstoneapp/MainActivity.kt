@@ -3,17 +3,14 @@ package com.example.capstoneapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
 import androidx.navigation.NavDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.*
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,14 +25,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
-    var userName by remember { mutableStateOf("") }
+    val userName = remember { mutableStateOf("") }
     var isDarkMode by remember { mutableStateOf(false) }
 
     val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFFFFFF)
     val topBarColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)
 
     Scaffold(
-        bottomBar = { BottomNavBar(navController, userName) },
+        bottomBar = { BottomNavBar(navController, userName.value) },
         containerColor = backgroundColor
     ) { paddingValues ->
         NavHost(
@@ -47,45 +44,38 @@ fun MyApp() {
                 WelcomeScreen(
                     navController = navController,
                     userName = userName,
-                    onUserNameChange = { userName = it },
                     isDarkMode = isDarkMode,
-                    toggleDarkMode = { isDarkMode = it },
-                    topBarColor = topBarColor
+                    topBarColor = topBarColor,
+                    toggleDarkMode = { isDarkMode = it }
                 )
             }
             composable("aboutMe") {
                 AboutMeScreen(
-                    userName = userName,
+                    userName = userName.value,
                     navController = navController,
                     isDarkMode = isDarkMode,
-                    toggleDarkMode = { isDarkMode = it },
-                    topBarColor = topBarColor
+                    topBarColor = topBarColor,
+                    toggleDarkMode = { isDarkMode = it }
                 )
             }
             composable("funFacts") {
                 FunFactsScreen(
                     navController = navController,
                     isDarkMode = isDarkMode,
-                    toggleDarkMode = { isDarkMode = it },
-                    topBarColor = topBarColor
+                    topBarColor = topBarColor,
+                    toggleDarkMode = { isDarkMode = it }
                 )
             }
         }
     }
 }
 
-data class BottomNavItem(
-    val route: String,
-    val label: String,
-    val icon: @Composable () -> Unit
-)
-
 @Composable
-fun BottomNavBar(navController: NavHostController, userName: String) {
+fun BottomNavBar(navController: androidx.navigation.NavHostController, userName: String) {
     val items = listOf(
-        BottomNavItem("welcome", "Welcome") { Icon(Icons.Filled.Home, contentDescription = null) },
-        BottomNavItem("aboutMe", "About Me") { Icon(Icons.Filled.Info, contentDescription = null) },
-        BottomNavItem("funFacts", "Fun Facts") { Icon(Icons.Filled.Face, contentDescription = null) }
+        BottomNavItem("welcome", "Welcome") { androidx.compose.material3.Icon(Icons.Filled.Home, null) },
+        BottomNavItem("aboutMe", "About Me") { androidx.compose.material3.Icon(Icons.Filled.Info, null) },
+        BottomNavItem("funFacts", "Fun Facts") { androidx.compose.material3.Icon(Icons.Filled.Face, null) }
     )
 
     NavigationBar(containerColor = Color(0xFF1976D2)) {
@@ -94,11 +84,11 @@ fun BottomNavBar(navController: NavHostController, userName: String) {
 
         items.forEach { item ->
             NavigationBarItem(
-                selected = currentDestination.isRouteActive(item.route),
+                selected = currentDestination?.route == item.route,
                 onClick = {
                     if (item.route == "aboutMe" && userName.isBlank()) return@NavigationBarItem
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -117,6 +107,8 @@ fun BottomNavBar(navController: NavHostController, userName: String) {
     }
 }
 
-private fun NavDestination?.isRouteActive(route: String): Boolean {
-    return this?.route == route
-}
+data class BottomNavItem(
+    val route: String,
+    val label: String,
+    val icon: @Composable () -> Unit
+)
