@@ -1,12 +1,17 @@
 package com.example.capstoneapp
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -15,25 +20,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var dataStoreManager: DataStoreManager
+    private val appViewModel: AppViewModel by viewModels { AppViewModelFactory(DataStoreManager(this)) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dataStoreManager = DataStoreManager(this)
+
+        // Create notification channel
+        NotificationUtils.createNotificationChannel(this)
+
+        // Schedule daily WorkManager notifications
+        val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(24, TimeUnit.HOURS)
+            .build()
+        WorkManager.getInstance(applicationContext)
+            .enqueueUniquePeriodicWork("capstone_notify_work", ExistingPeriodicWorkPolicy.KEEP, workRequest)
+
+        // Show immediate welcome notification
+        NotificationHelper.scheduleImmediateNotification(this)
+
         setContent {
-            MyApp()
+            MyApp(appViewModel)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyApp() {
+fun MyApp(viewModel: AppViewModel) {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "welcome") {
         composable("welcome") { WelcomeScreen(navController) }
@@ -41,7 +70,6 @@ fun MyApp() {
             val name = backStackEntry.arguments?.getString("userName") ?: ""
             AboutMeScreen(name, navController)
         }
-        composable("funFacts") { FunFactsScreen(navController) } // Commit 10 new screen
     }
 }
 
@@ -49,70 +77,56 @@ fun MyApp() {
 fun WelcomeScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
-    var colorIndex by remember { mutableIntStateOf(0) }
-    val colors = listOf(
-        Color(0xFFBBDEFB),
-        Color(0xFFC8E6C9),
-        Color(0xFFFFF9C4),
-        Color(0xFFFFCDD2)
-    )
+    var colorIndex by remember { mutableStateOf(0) }
+    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
     val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(currentColor)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(20.dp))
-
-        OutlinedTextField(
-            value = name,
-            onValueChange = {
-                name = it
-                showError = false
-            },
-            label = { Text("Enter your name") },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        )
-
-        if (showError) {
-            Text(
-                text = "Name cannot be empty!",
-                color = Color.Red,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(top = 5.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(
-            onClick = {
-                if (name.isBlank()) {
-                    showError = true
-                } else {
-                    navController.navigate("aboutMe/$name")
-                }
-            },
-            modifier = Modifier.fillMaxWidth(0.5f)
+    Scaffold(
+        bottomBar = { BottomNavBar(navController, userName) },
+        containerColor = backgroundColor
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = "welcome",
+            modifier = Modifier.padding(paddingValues)
         ) {
-            Text("Next Page")
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Button(
-            onClick = { colorIndex++ },
-            modifier = Modifier.fillMaxWidth(0.5f)
-        ) {
-            Text("Change Background")
+            composable("welcome") {
+                WelcomeScreen(
+                    navController = navController,
+                    userName = userName,
+                    onUserNameChange = { viewModel.setUserName(it) },
+                    isDarkMode = isDarkMode,
+                    toggleDarkMode = { viewModel.setDarkMode(it) },
+                    topBarColor = topBarColor
+                )
+            }
+            composable("aboutMe") {
+                AboutMeScreen(
+                    userName = userName,
+                    navController = navController,
+                    isDarkMode = isDarkMode,
+                    toggleDarkMode = { viewModel.setDarkMode(it) },
+                    topBarColor = topBarColor
+                )
+            }
+            composable("funFacts") {
+                FunFactsScreen(
+                    navController = navController,
+                    isDarkMode = isDarkMode,
+                    toggleDarkMode = { viewModel.setDarkMode(it) },
+                    topBarColor = topBarColor
+                )
+            }
         }
     }
 }
+
+// ------------------- Bottom Navigation -------------------
+data class BottomNavItem(
+    val route: String,
+    val label: String,
+    val icon: @Composable () -> Unit
+)
 
 @Composable
 fun AboutMeScreen(userName: String, navController: NavHostController) {
@@ -142,6 +156,7 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(15.dp))
 
+        // New button for Commit 8
         Button(
             onClick = {
                 Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
@@ -191,4 +206,8 @@ fun FunFactsScreen(navController: NavHostController) {
             Text("Back")
         }
     }
+}
+
+private fun NavDestination?.isRouteActive(route: String): Boolean {
+    return this?.route == route
 }
