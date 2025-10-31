@@ -11,19 +11,21 @@ import kotlinx.coroutines.launch
 
 class AppViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
 
-    private val _userName = MutableStateFlow("")
-    val userName: StateFlow<String> = _userName
+    val isDarkMode: StateFlow<Boolean> = dataStoreManager.darkModeFlow
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
-    val isDarkMode: StateFlow<Boolean> =
-        dataStoreManager.darkModeFlow.stateIn(viewModelScope, SharingStarted.Lazily, false)
-
-    fun setUserName(name: String) {
-        _userName.value = name
-    }
+    val userName: StateFlow<String> = dataStoreManager.userNameFlow
+        .stateIn(viewModelScope, SharingStarted.Lazily, "")
 
     fun setDarkMode(enabled: Boolean) {
         viewModelScope.launch {
             dataStoreManager.setDarkMode(enabled)
+        }
+    }
+
+    fun setUserName(name: String) {
+        viewModelScope.launch {
+            dataStoreManager.setUserName(name)
         }
     }
 }
