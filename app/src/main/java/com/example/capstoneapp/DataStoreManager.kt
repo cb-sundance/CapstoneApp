@@ -14,26 +14,28 @@ class DataStoreManager(private val context: Context) {
 
     companion object {
         val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
-        val USERNAME_KEY = stringPreferencesKey("username")
+        val USER_NAME_KEY = stringPreferencesKey("user_name")
     }
 
-    // Dark mode
+    // Save dark mode preference
     suspend fun setDarkMode(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = enabled
         }
     }
 
+    // Read dark mode preference
     val darkModeFlow: Flow<Boolean> = context.dataStore.data
         .map { preferences -> preferences[DARK_MODE_KEY] ?: false }
 
-    // Username
+    // Save username
     suspend fun setUserName(name: String) {
         context.dataStore.edit { preferences ->
-            preferences[USERNAME_KEY] = name
+            preferences[USER_NAME_KEY] = name
         }
     }
 
+    // Read username
     val userNameFlow: Flow<String> = context.dataStore.data
-        .map { preferences -> preferences[USERNAME_KEY] ?: "" }
+        .map { preferences -> preferences[USER_NAME_KEY] ?: "" }
 }
