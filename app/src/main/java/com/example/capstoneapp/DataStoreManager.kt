@@ -2,8 +2,8 @@ package com.example.capstoneapp
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -14,7 +14,7 @@ class DataStoreManager(private val context: Context) {
 
     companion object {
         val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
-        val USER_NAME_KEY = stringPreferencesKey("user_name")
+        val USERNAME_KEY = stringPreferencesKey("username")
     }
 
     // Dark mode
@@ -28,12 +28,12 @@ class DataStoreManager(private val context: Context) {
         .map { preferences -> preferences[DARK_MODE_KEY] ?: false }
 
     // Username
-    suspend fun saveUserName(name: String) {
+    suspend fun setUserName(name: String) {
         context.dataStore.edit { preferences ->
-            preferences[USER_NAME_KEY] = name
+            preferences[USERNAME_KEY] = name
         }
     }
 
     val userNameFlow: Flow<String> = context.dataStore.data
-        .map { preferences -> preferences[USER_NAME_KEY] ?: "" }
+        .map { preferences -> preferences[USERNAME_KEY] ?: "" }
 }
