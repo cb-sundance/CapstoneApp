@@ -14,3 +14,4 @@ class AppViewModelFactory(private val dataStoreManager: DataStoreManager) :
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+

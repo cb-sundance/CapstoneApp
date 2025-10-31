@@ -6,15 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var dataStoreManager: DataStoreManager
-    private val appViewModel: AppViewModel by viewModels { AppViewModelFactory(dataStoreManager) }
+    private val appViewModel: AppViewModel by viewModels {
+        AppViewModelFactory(dataStoreManager)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +37,8 @@ fun MyApp(viewModel: AppViewModel) {
     val userName by viewModel.userName.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
 
-    val backgroundColor = if (isDarkMode) androidx.compose.ui.graphics.Color(0xFF121212) else androidx.compose.ui.graphics.Color(0xFFFFFFFF)
-    val topBarColor = if (isDarkMode) androidx.compose.ui.graphics.Color(0xFF1F1F1F) else androidx.compose.ui.graphics.Color(0xFF1976D2)
+    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFFFFFF)
+    val topBarColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)
 
     Scaffold(
         bottomBar = { BottomNavBar(navController, userName) },
@@ -44,7 +47,7 @@ fun MyApp(viewModel: AppViewModel) {
         NavHost(
             navController = navController,
             startDestination = "welcome",
-            modifier = Modifier.padding(paddingValues)
+            modifier = androidx.compose.ui.Modifier.padding(paddingValues)
         ) {
             composable("welcome") {
                 WelcomeScreen(
@@ -58,8 +61,8 @@ fun MyApp(viewModel: AppViewModel) {
             }
             composable("aboutMe") {
                 AboutMeScreen(
-                    userName = userName,
                     navController = navController,
+                    userName = userName,
                     isDarkMode = isDarkMode,
                     toggleDarkMode = { viewModel.setDarkMode(it) },
                     topBarColor = topBarColor
