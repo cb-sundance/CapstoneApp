@@ -19,27 +19,23 @@ import androidx.navigation.NavHostController
 fun FunFactsScreen(
     navController: NavHostController,
     isDarkMode: Boolean,
-    toggleDarkMode: (Boolean) -> Unit,
-    topBarColor: Color
+    topBarColor: Color,
+    toggleDarkMode: (Boolean) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fun Facts") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = topBarColor,
-                    titleContentColor = Color.White
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
-                            onCheckedChange = toggleDarkMode,
+                            onCheckedChange = { toggleDarkMode(it) },
                             colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
             )
@@ -57,22 +53,16 @@ fun FunFactsScreen(
             Image(
                 painter = painterResource(id = R.drawable.funfacts_image),
                 contentDescription = "Fun Facts image",
-                modifier = Modifier
-                    .size(140.dp)
-                    .padding(bottom = 16.dp)
+                modifier = Modifier.size(140.dp).padding(bottom = 16.dp)
             )
 
             Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(15.dp))
-
-            // Replace these fun facts with your own
             Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
             Spacer(modifier = Modifier.height(10.dp))
             Text("• My favorite color is yellow, but not to wear", fontSize = 17.sp)
             Spacer(modifier = Modifier.height(10.dp))
             Text("• I enjoy learning new tech.", fontSize = 17.sp)
-            Spacer(modifier = Modifier.height(10.dp))
-            Text("• I like creating Android apps and seeing them come to life!", fontSize = 17.sp)
         }
     }
 }

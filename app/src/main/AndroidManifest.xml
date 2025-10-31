@@ -11,6 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CapstoneApp">
+        <meta-data
+            android:name="com.google.android.datastore"
+            android:value="true" />
+        <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

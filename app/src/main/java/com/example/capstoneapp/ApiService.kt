@@ -4,16 +4,16 @@ import retrofit2.http.GET
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-data class FunFact(val text: String)
+data class PhotoItem(val albumId: Int, val id: Int, val title: String, val url: String, val thumbnailUrl: String)
 
 interface ApiService {
-    @GET("random/trivia") // Example endpoint
-    suspend fun getFunFact(): FunFact
+    @GET("photos?albumId=1")
+    suspend fun getPhotos(): List<PhotoItem>
 
     companion object {
         fun create(): ApiService {
             val retrofit = Retrofit.Builder()
-                .baseUrl("https://api.example.com/") // Replace with actual API
+                .baseUrl("https://jsonplaceholder.typicode.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
             return retrofit.create(ApiService::class.java)

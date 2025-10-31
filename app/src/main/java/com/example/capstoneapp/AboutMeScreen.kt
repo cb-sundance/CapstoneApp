@@ -31,20 +31,16 @@ fun AboutMeScreen(
         topBar = {
             TopAppBar(
                 title = { Text("About Me") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = topBarColor,
-                    titleContentColor = Color.White
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
-                            onCheckedChange = toggleDarkMode,
+                            onCheckedChange = { toggleDarkMode(it) },
                             colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
             )
@@ -62,16 +58,14 @@ fun AboutMeScreen(
             Image(
                 painter = painterResource(id = R.drawable.about_image),
                 contentDescription = "About image",
-                modifier = Modifier
-                    .size(140.dp)
-                    .padding(bottom = 16.dp)
+                modifier = Modifier.size(140.dp).padding(bottom = 16.dp)
             )
 
             Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(15.dp))
             Text("Hello, $userName!", fontSize = 22.sp)
             Spacer(modifier = Modifier.height(15.dp))
-            Text("This is the About Me page. You can describe yourself here, your interests, or any other info you'd like to share.", fontSize = 18.sp)
+            Text("This is the About Me page.", fontSize = 18.sp)
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
