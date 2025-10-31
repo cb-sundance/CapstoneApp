@@ -1,19 +1,24 @@
 package com.example.capstoneapp
 
 import android.content.Context
-import androidx.work.CoroutineWorker
+import androidx.work.Worker
 import androidx.work.WorkerParameters
 
-class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(appContext, workerParams) {
+class SyncWorker(
+    context: Context,
+    params: WorkerParameters
+) : Worker(context, params) {
 
-    override suspend fun doWork(): Result {
-        // This worker posts a simple notification to remind user to check the app.
+    override fun doWork(): Result {
+        // Example background task: send a daily notification
         NotificationUtils.showSimpleNotification(
-            context = applicationContext,
-            title = "Capstone App",
-            message = "Don't forget to check your app updates!"
+            applicationContext,
+            "Daily Reminder",
+            "Don't forget to check your Capstone App today!"
         )
+
+        // Return success
         return Result.success()
     }
 }
+

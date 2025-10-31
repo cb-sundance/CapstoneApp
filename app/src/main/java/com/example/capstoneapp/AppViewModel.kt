@@ -1,34 +1,29 @@
 package com.example.capstoneapp
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AppViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
+class AppViewModel(application: Application, private val dataStoreManager: DataStoreManager) :
+    AndroidViewModel(application) {
 
-    private val _isDarkMode = MutableStateFlow(false)
-    val isDarkMode: StateFlow<Boolean> = _isDarkMode
-
+    // userName kept in memory (you can persist it if you add a key in DataStoreManager)
     private val _userName = MutableStateFlow("")
-    val userName: StateFlow<String> = _userName
+    val userName: StateFlow<String> = _userName.asStateFlow()
 
-    init {
+    // dark mode state from DataStore
+    val isDarkMode = dataStoreManager.darkModeFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun setUserName(name: String) {
         viewModelScope.launch {
-            // collect DataStore flows to keep UI state in sync
-            dataStoreManager.darkModeFlow.collectLatest { value ->
-                _isDarkMode.value = value
-            }
-        }
-        viewModelScope.launch {
-            dataStoreManager.userNameFlow.collectLatest { name ->
-                _userName.value = name
-            }
+            _userName.emit(name)
         }
     }
 
@@ -38,20 +33,10 @@ class AppViewModel(private val dataStoreManager: DataStoreManager) : ViewModel()
         }
     }
 
-    fun setUserName(name: String) {
-        viewModelScope.launch {
-            dataStoreManager.setUserName(name)
-        }
-    }
-}
-
-class AppViewModelFactory(private val dataStoreManager: DataStoreManager) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AppViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AppViewModel(dataStoreManager) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    // Helper to schedule immediate notification from UI (MainActivity)
+    fun scheduleImmediateNotification() {
+        // Not enqueueing WorkManager here because ViewModel shouldn't hold context.
+        // Instead, MainActivity will call NotificationHelper.scheduleImmediateNotification(context)
     }
 }
 

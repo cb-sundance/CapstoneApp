@@ -25,16 +25,16 @@ fun WelcomeScreen(
     toggleDarkMode: (Boolean) -> Unit,
     topBarColor: Color
 ) {
-    var inputName by remember { mutableStateOf(userName) }
+    var localName by remember { mutableStateOf(userName) }
     var showError by remember { mutableStateOf(false) }
     var colorIndex by remember { mutableStateOf(0) }
 
-    val lightColors = listOf(Color(0xFFFFF9C4), Color(0xFFFFCDD2), Color(0xFFC8E6C9))
-    val darkColors = listOf(Color(0xFF1F1F1F), Color(0xFF2E2E2E), Color(0xFF3E3E3E))
-    val currentColor by animateColorAsState(
-        targetValue = if (isDarkMode) darkColors[colorIndex % darkColors.size]
-        else lightColors[colorIndex % lightColors.size]
-    )
+    val colors = if (isDarkMode) {
+        listOf(Color(0xFF1F1F1F), Color(0xFF2E2E2E), Color(0xFF3E3E3E))
+    } else {
+        listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFE91E63), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+    }
+    val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
     Scaffold(
         topBar = {
@@ -64,21 +64,23 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Add your welcome image in drawable folder and name it "welcome_image"
             Image(
                 painter = painterResource(id = R.drawable.welcome_image),
                 contentDescription = "Welcome image",
-                modifier = Modifier.size(150.dp).padding(bottom = 16.dp)
+                modifier = Modifier.size(150.dp)
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
             Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = inputName,
+                value = localName,
                 onValueChange = {
-                    inputName = it
-                    showError = false
+                    localName = it
                     onUserNameChange(it)
+                    showError = false
                 },
                 label = { Text("Enter your name") },
                 modifier = Modifier.fillMaxWidth(0.8f)
@@ -92,20 +94,14 @@ fun WelcomeScreen(
 
             Button(
                 onClick = {
-                    if (inputName.isBlank()) showError = true
-                    else navController.navigate("aboutMe")
+                    if (localName.isBlank()) showError = true else navController.navigate("aboutMe")
                 },
                 modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text("Next Page")
-            }
+            ) { Text("Next Page") }
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
-                onClick = { colorIndex++ },
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
+            Button(onClick = { colorIndex++ }, modifier = Modifier.fillMaxWidth(0.5f)) {
                 Text("Change Background")
             }
         }

@@ -19,25 +19,14 @@ import androidx.navigation.NavHostController
 fun FunFactsScreen(
     navController: NavHostController,
     isDarkMode: Boolean,
-    topBarColor: Color,
-    toggleDarkMode: (Boolean) -> Unit
+    toggleDarkMode: (Boolean) -> Unit,
+    topBarColor: Color
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fun Facts") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
-                actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Switch(
-                            checked = isDarkMode,
-                            onCheckedChange = { toggleDarkMode(it) },
-                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
-                        )
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White)
             )
         }
     ) { paddingValues ->
@@ -53,15 +42,16 @@ fun FunFactsScreen(
             Image(
                 painter = painterResource(id = R.drawable.funfacts_image),
                 contentDescription = "Fun Facts image",
-                modifier = Modifier.size(140.dp).padding(bottom = 16.dp)
+                modifier = Modifier.size(140.dp)
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
             Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text("• My favorite color is yellow, but not to wear", fontSize = 17.sp)
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text("• I enjoy learning new tech.", fontSize = 17.sp)
         }
     }

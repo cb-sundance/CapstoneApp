@@ -1,6 +1,5 @@
 package com.example.capstoneapp
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,14 +18,13 @@ import androidx.navigation.NavHostController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutMeScreen(
-    userName: String,
     navController: NavHostController,
+    userName: String,
     isDarkMode: Boolean,
     toggleDarkMode: (Boolean) -> Unit,
     topBarColor: Color
 ) {
     val context = LocalContext.current
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,25 +53,25 @@ fun AboutMeScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Add your about image in drawable folder and name it "about_image"
             Image(
                 painter = painterResource(id = R.drawable.about_image),
                 contentDescription = "About image",
-                modifier = Modifier.size(140.dp).padding(bottom = 16.dp)
+                modifier = Modifier.size(140.dp)
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
             Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text("Hello, $userName!", fontSize = 22.sp)
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text("This is the About Me page.", fontSize = 18.sp)
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show() },
+                onClick = { NotificationUtils.showSimpleNotification(context, "Hello", "Have a great day, $userName!") },
                 modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text("Greet Me")
-            }
+            ) { Text("Greet Me") }
         }
     }
 }
