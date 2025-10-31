@@ -1,17 +1,25 @@
-package com.example.capstoneapp
+package your.package.name
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
-import org.junit.Assert.*
-
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        // simple unit test example
+        val a = 2
+        val b = 3
+        val expected = 5
+        assertEquals(expected, a + b)
+    }
+
+    @Test
+    fun formatMessage_returnsExpected() {
+        val input = "Carissa"
+        val result = "Hello, $input!"
+        // pretend there's a function to test:
+        // assertEquals(result, Utils.formatGreeting(input))
+        // since this is a template, assert a known value
+        assertEquals("Hello, Carissa!", result)
     }
 }

@@ -1,4 +1,4 @@
-package com.example.myapp
+package com.example.capstoneapp
 
 import android.os.Bundle
 import android.widget.Toast
@@ -8,6 +8,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +41,7 @@ fun MyApp() {
             val name = backStackEntry.arguments?.getString("userName") ?: ""
             AboutMeScreen(name, navController)
         }
+        composable("funFacts") { FunFactsScreen(navController) } // Commit 10 new screen
     }
 }
 
@@ -46,8 +49,13 @@ fun MyApp() {
 fun WelcomeScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
-    var colorIndex by remember { mutableStateOf(0) }
-    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+    var colorIndex by remember { mutableIntStateOf(0) }
+    val colors = listOf(
+        Color(0xFFBBDEFB),
+        Color(0xFFC8E6C9),
+        Color(0xFFFFF9C4),
+        Color(0xFFFFCDD2)
+    )
     val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
     Column(
@@ -134,7 +142,6 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        // New button for Commit 8
         Button(
             onClick = {
                 Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
@@ -142,6 +149,46 @@ fun AboutMeScreen(userName: String, navController: NavHostController) {
             modifier = Modifier.fillMaxWidth(0.5f)
         ) {
             Text("Greet Me")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // Button to navigate to Fun Facts with standard icon
+        Button(
+            onClick = { navController.navigate("funFacts") },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Icon(Icons.Filled.Info, contentDescription = "Fun Icon")
+            Spacer(modifier = Modifier.width(5.dp))
+            Text("Fun Facts")
+        }
+    }
+}
+
+@Composable
+fun FunFactsScreen(navController: NavHostController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFE1F5FE))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("• I love gaming and the process behind making them!", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text("• My favorite color is yellow, but not to wear", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text("• I enjoy learning new tech.", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Button(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ) {
+            Text("Back")
         }
     }
 }
