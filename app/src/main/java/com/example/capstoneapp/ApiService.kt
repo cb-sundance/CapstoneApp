@@ -4,17 +4,16 @@ import retrofit2.http.GET
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-data class PhotoResponse(val urls: Urls)
-data class Urls(val small: String)
+data class FunFact(val text: String)
 
 interface ApiService {
-    @GET("photos/random?client_id=YOUR_ACCESS_KEY") // replace with your Unsplash API key
-    suspend fun getRandomPhoto(): PhotoResponse
+    @GET("random/trivia") // Example endpoint
+    suspend fun getFunFact(): FunFact
 
     companion object {
         fun create(): ApiService {
             val retrofit = Retrofit.Builder()
-                .baseUrl("https://api.unsplash.com/")
+                .baseUrl("https://api.example.com/") // Replace with actual API
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
             return retrofit.create(ApiService::class.java)
