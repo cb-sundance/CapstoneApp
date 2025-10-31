@@ -19,8 +19,8 @@ import androidx.navigation.NavHostController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutMeScreen(
-    userName: String,
     navController: NavHostController,
+    userName: String,
     isDarkMode: Boolean,
     toggleDarkMode: (Boolean) -> Unit,
     topBarColor: Color
@@ -31,7 +31,10 @@ fun AboutMeScreen(
         topBar = {
             TopAppBar(
                 title = { Text("About Me") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
@@ -45,7 +48,8 @@ fun AboutMeScreen(
                     }
                 }
             )
-        }
+        },
+        containerColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFAFAFA)
     ) { paddingValues ->
         Column(
             modifier = Modifier
