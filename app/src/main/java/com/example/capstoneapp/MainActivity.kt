@@ -5,9 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,9 +14,7 @@ import androidx.navigation.compose.rememberNavController
 class MainActivity : ComponentActivity() {
 
     private lateinit var dataStoreManager: DataStoreManager
-    private val appViewModel: AppViewModel by viewModels {
-        AppViewModelFactory(dataStoreManager)
-    }
+    private val appViewModel: AppViewModel by viewModels { AppViewModelFactory(dataStoreManager) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,36 +31,36 @@ class MainActivity : ComponentActivity() {
 fun MyApp(viewModel: AppViewModel) {
     val navController = rememberNavController()
 
-    val userName = viewModel.userName.collectAsState(initial = "")
-    val isDarkMode = viewModel.isDarkMode.collectAsState(initial = false)
+    val userName by viewModel.userName.collectAsState()
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
 
-    val backgroundColor = if (isDarkMode.value) Color(0xFF121212) else Color(0xFFFFFFFF)
-    val topBarColor = if (isDarkMode.value) Color(0xFF1F1F1F) else Color(0xFF1976D2)
+    val backgroundColor = if (isDarkMode) androidx.compose.ui.graphics.Color(0xFF121212) else androidx.compose.ui.graphics.Color(0xFFFFFFFF)
+    val topBarColor = if (isDarkMode) androidx.compose.ui.graphics.Color(0xFF1F1F1F) else androidx.compose.ui.graphics.Color(0xFF1976D2)
 
     Scaffold(
-        bottomBar = { BottomNavBar(navController, userName.value) },
+        bottomBar = { BottomNavBar(navController, userName) },
         containerColor = backgroundColor
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = "welcome",
-            modifier = androidx.compose.ui.Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues)
         ) {
             composable("welcome") {
                 WelcomeScreen(
                     navController = navController,
-                    userName = userName.value,
+                    userName = userName,
                     onUserNameChange = { viewModel.setUserName(it) },
-                    isDarkMode = isDarkMode.value,
+                    isDarkMode = isDarkMode,
                     toggleDarkMode = { viewModel.setDarkMode(it) },
                     topBarColor = topBarColor
                 )
             }
             composable("aboutMe") {
                 AboutMeScreen(
-                    userName = userName.value,
+                    userName = userName,
                     navController = navController,
-                    isDarkMode = isDarkMode.value,
+                    isDarkMode = isDarkMode,
                     toggleDarkMode = { viewModel.setDarkMode(it) },
                     topBarColor = topBarColor
                 )
@@ -71,7 +68,7 @@ fun MyApp(viewModel: AppViewModel) {
             composable("funFacts") {
                 FunFactsScreen(
                     navController = navController,
-                    isDarkMode = isDarkMode.value,
+                    isDarkMode = isDarkMode,
                     toggleDarkMode = { viewModel.setDarkMode(it) },
                     topBarColor = topBarColor
                 )

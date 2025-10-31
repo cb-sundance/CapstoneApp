@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,12 +21,12 @@ import androidx.navigation.NavHostController
 @Composable
 fun AboutMeScreen(
     navController: NavHostController,
-    userName: String,
-    isDarkMode: Boolean,
-    toggleDarkMode: (Boolean) -> Unit,
+    viewModel: AppViewModel,
     topBarColor: Color
 ) {
     val context = LocalContext.current
+    val userName by viewModel.userName.collectAsState()
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     Scaffold(
         topBar = {
@@ -41,15 +42,14 @@ fun AboutMeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
-                            onCheckedChange = { toggleDarkMode(it) },
+                            onCheckedChange = { viewModel.setDarkMode(it) },
                             colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
             )
-        },
-        containerColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFAFAFA)
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
