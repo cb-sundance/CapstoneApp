@@ -32,18 +32,30 @@ fun WelcomeScreen(
     val colors = if (isDarkMode) {
         listOf(Color(0xFF1F1F1F), Color(0xFF2E2E2E), Color(0xFF3E3E3E))
     } else {
-        listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFE91E63), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+        listOf(
+            Color(0xFFBBDEFB),
+            Color(0xFFC8E6C9),
+            Color(0xFFFFF9C4),
+            Color(0xFFFFCDD2)
+        )
     }
+
     val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Welcome Screen") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor, titleContentColor = Color.White),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White
+                ),
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
+                        Text(
+                            text = if (isDarkMode) "Dark" else "Light",
+                            color = Color.White
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isDarkMode,
@@ -56,6 +68,7 @@ fun WelcomeScreen(
         },
         containerColor = currentColor
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -64,7 +77,7 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Add your welcome image in drawable folder and name it "welcome_image"
+
             Image(
                 painter = painterResource(id = R.drawable.welcome_image),
                 contentDescription = "Welcome image",
@@ -72,7 +85,9 @@ fun WelcomeScreen(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+
             Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
@@ -87,21 +102,36 @@ fun WelcomeScreen(
             )
 
             if (showError) {
-                Text("Name cannot be empty!", color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp))
+                Text(
+                    "Name cannot be empty!",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 5.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // ✅ Espresso test expects "Continue"
             Button(
                 onClick = {
-                    if (localName.isBlank()) showError = true else navController.navigate("aboutMe")
+                    if (localName.isBlank()) {
+                        showError = true
+                    } else {
+                        navController.navigate("aboutMe/$localName")
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(0.5f)
-            ) { Text("Next Page") }
+            ) {
+                Text("Continue")
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(onClick = { colorIndex++ }, modifier = Modifier.fillMaxWidth(0.5f)) {
+            Button(
+                onClick = { colorIndex++ },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            ) {
                 Text("Change Background")
             }
         }

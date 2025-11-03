@@ -1,6 +1,10 @@
 package com.example.capstoneapp
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
@@ -16,9 +20,9 @@ class NotificationWorker(appContext: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         try {
-            // Build and show notification
             val title = "Capstone App"
             val text = "Thanks for opening the app — keep going with the project!"
+
             val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
@@ -26,10 +30,22 @@ class NotificationWorker(appContext: Context, params: WorkerParameters) :
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
 
-            with(NotificationManagerCompat.from(applicationContext)) {
-                notify(NOTIFICATION_ID, builder.build())
+            val notificationManager = NotificationManagerCompat.from(applicationContext)
+
+            // ✅ REQUIRED FOR ANDROID 13+ (Prevents the error you're getting)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return Result.failure()   // Permission not granted — don't crash
+                }
             }
+
+            notificationManager.notify(NOTIFICATION_ID, builder.build())
             return Result.success()
+
         } catch (e: Exception) {
             return Result.failure()
         }

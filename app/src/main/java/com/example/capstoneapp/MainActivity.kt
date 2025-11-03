@@ -1,9 +1,13 @@
 package com.example.capstoneapp
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,8 +17,6 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,94 +26,55 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import java.util.concurrent.TimeUnit
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
 
-    // Permission launcher
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+    // ✅ Notification permission launcher (Android 13+)
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                // Permission granted
+                println("✅ Notification permission granted")
             } else {
-                // Permission denied, handle accordingly
+                println("❌ Notification permission denied")
             }
         }
-
-
-    private lateinit var dataStoreManager: DataStoreManager
-    private lateinit var appViewModel: AppViewModel
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Request notification permission on Android 13+
+        // ✅ Ask for POST_NOTIFICATIONS permission (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
 
-
-        // Create notification channel
-        NotificationUtils.createNotificationChannel(this)
-
-        // Schedule daily WorkManager notifications
-        val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(24, TimeUnit.HOURS)
-            .build()
-        WorkManager.getInstance(applicationContext)
-            .enqueueUniquePeriodicWork("capstone_notify_work", ExistingPeriodicWorkPolicy.KEEP, workRequest)
-
-        // Show immediate welcome notification
-        NotificationUtils.scheduleImmediateNotification(this)
-
         setContent {
-            MyApp(appViewModel)
+            MyApp()
         }
     }
-}
-
-private fun NotificationUtils.scheduleImmediateNotification(mainActivity: MainActivity) {
-    TODO("Not yet implemented")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyApp(viewModel: AppViewModel) {
+fun MyApp() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = "welcome") {
-        composable("welcome") { WelcomeScreen(navController) }
-        composable("aboutMe/{userName}") { backStackEntry ->
-            val name = backStackEntry.arguments?.getString("userName") ?: ""
-            AboutMeScreen(name, navController)
-        }
-    }
-}
+    val userNameState = remember { mutableStateOf("") }
+    var isDarkMode by remember { mutableStateOf(false) }
 
-@Composable
-fun WelcomeScreen(navController: NavHostController) {
-    var name by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
-    var colorIndex by remember { mutableStateOf(0) }
-    val colors = listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
-    val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
+    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFFFFFFF)
 
     Scaffold(
-        bottomBar = { BottomNavBar(navController, userName) },
+        bottomBar = { BottomNavBar(navController = navController, currentUserName = userNameState.value) },
         containerColor = backgroundColor
     ) { paddingValues ->
         NavHost(
@@ -122,35 +85,32 @@ fun WelcomeScreen(navController: NavHostController) {
             composable("welcome") {
                 WelcomeScreen(
                     navController = navController,
-                    userName = userName,
-                    onUserNameChange = { viewModel.setUserName(it) },
+                    userNameState = userNameState,
                     isDarkMode = isDarkMode,
-                    toggleDarkMode = { viewModel.setDarkMode(it) },
-                    topBarColor = topBarColor
+                    onToggleDark = { isDarkMode = it }
                 )
             }
             composable("aboutMe") {
                 AboutMeScreen(
-                    userName = userName,
                     navController = navController,
+                    userName = userNameState.value,
                     isDarkMode = isDarkMode,
-                    toggleDarkMode = { viewModel.setDarkMode(it) },
-                    topBarColor = topBarColor
+                    onToggleDark = { isDarkMode = it }
                 )
             }
             composable("funFacts") {
                 FunFactsScreen(
                     navController = navController,
                     isDarkMode = isDarkMode,
-                    toggleDarkMode = { viewModel.setDarkMode(it) },
-                    topBarColor = topBarColor
+                    onToggleDark = { isDarkMode = it }
                 )
             }
         }
     }
 }
 
-// ------------------- Bottom Navigation -------------------
+/* ---------------------- Bottom nav & helpers ---------------------- */
+
 data class BottomNavItem(
     val route: String,
     val label: String,
@@ -158,85 +118,243 @@ data class BottomNavItem(
 )
 
 @Composable
-fun AboutMeScreen(userName: String, navController: NavHostController) {
-    val context = LocalContext.current
+fun BottomNavBar(navController: NavHostController, currentUserName: String) {
+    val items = listOf(
+        BottomNavItem("welcome", "Welcome") { Icon(Icons.Filled.Home, contentDescription = null) },
+        BottomNavItem("aboutMe", "About Me") { Icon(Icons.Filled.Info, contentDescription = null) },
+        BottomNavItem("funFacts", "Fun Facts") { Icon(Icons.Filled.Face, contentDescription = null) }
+    )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFAFAFA))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(15.dp))
-        Text("Hello, $userName!", fontSize = 22.sp)
-        Spacer(modifier = Modifier.height(15.dp))
-        Text("This is the About Me page.", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(30.dp))
+    NavigationBar(containerColor = Color(0xFF1976D2)) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
 
-        Button(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.fillMaxWidth(0.5f)
-        ) {
-            Text("Back")
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        // New button for Commit 8
-        Button(
-            onClick = {
-                Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
-            },
-            modifier = Modifier.fillMaxWidth(0.5f)
-        ) {
-            Text("Greet Me")
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        // Button to navigate to Fun Facts with standard icon
-        Button(
-            onClick = { navController.navigate("funFacts") },
-            modifier = Modifier.fillMaxWidth(0.5f)
-        ) {
-            Icon(Icons.Filled.Info, contentDescription = "Fun Icon")
-            Spacer(modifier = Modifier.width(5.dp))
-            Text("Fun Facts")
-        }
-    }
-}
-
-@Composable
-fun FunFactsScreen(navController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFE1F5FE))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(15.dp))
-        Text("• I love gaming and the process behind making them!", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text("• My favorite color is yellow, but not to wear", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text("• I enjoy learning new tech.", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Button(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.fillMaxWidth(0.5f)
-        ) {
-            Text("Back")
+        items.forEach { item ->
+            NavigationBarItem(
+                selected = currentDestination.isRouteActive(item.route),
+                onClick = {
+                    if (item.route == "aboutMe" && currentUserName.isBlank()) return@NavigationBarItem
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                icon = { item.icon() },
+                label = { Text(item.label) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.White,
+                    selectedTextColor = Color.White,
+                    unselectedIconColor = Color.White.copy(alpha = 0.7f),
+                    unselectedTextColor = Color.White.copy(alpha = 0.7f),
+                    indicatorColor = Color(0xFF0D47A1)
+                )
+            )
         }
     }
 }
 
 private fun NavDestination?.isRouteActive(route: String): Boolean {
     return this?.route == route
+}
+
+/* ---------------------- Screens ---------------------- */
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WelcomeScreen(
+    navController: NavHostController,
+    userNameState: MutableState<String>,
+    isDarkMode: Boolean,
+    onToggleDark: (Boolean) -> Unit
+) {
+    var showError by remember { mutableStateOf(false) }
+    var colorIndex by remember { mutableStateOf(0) }
+
+    val colors = if (isDarkMode) {
+        listOf(Color(0xFF1F1F1F), Color(0xFF2E2E2E), Color(0xFF3E3E3E))
+    } else {
+        listOf(Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFE91E63), Color(0xFFFFF9C4), Color(0xFFFFCDD2))
+    }
+    val currentColor by animateColorAsState(targetValue = colors[colorIndex % colors.size])
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Welcome") },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)),
+                actions = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { onToggleDark(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
+                        )
+                    }
+                }
+            )
+        },
+        containerColor = currentColor
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.welcome_image),
+                contentDescription = "Welcome image",
+                modifier = Modifier.size(150.dp).padding(bottom = 16.dp)
+            )
+
+            Text("Welcome!", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = userNameState.value,
+                onValueChange = {
+                    userNameState.value = it
+                    showError = false
+                },
+                label = { Text("Enter your name") },
+                modifier = Modifier.fillMaxWidth(0.8f)
+            )
+
+            if (showError) {
+                Text("Name cannot be empty!", color = Color.Red, fontSize = 14.sp)
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    if (userNameState.value.isBlank()) showError = true
+                    else navController.navigate("aboutMe")
+                },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            ) {
+                Text("Next Page")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(onClick = { colorIndex++ }, modifier = Modifier.fillMaxWidth(0.5f)) {
+                Text("Change Background")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutMeScreen(
+    navController: NavHostController,
+    userName: String,
+    isDarkMode: Boolean,
+    onToggleDark: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("About Me") },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2)),
+                actions = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = if (isDarkMode) "Dark" else "Light", color = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { onToggleDark(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White)
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFFAFAFA))
+                .padding(paddingValues)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.about_image),
+                contentDescription = "About image",
+                modifier = Modifier.size(140.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("About Me", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Hello, $userName!", fontSize = 22.sp)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("This is the About Me page.", fontSize = 18.sp)
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    try {
+                        NotificationUtils.showSimpleNotification(context, "Hello", "Have a great day, $userName!")
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Have a great day, $userName!", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            ) {
+                Text("Greet Me")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FunFactsScreen(
+    navController: NavHostController,
+    isDarkMode: Boolean,
+    onToggleDark: (Boolean) -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Fun Facts") },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isDarkMode) Color(0xFF1F1F1F) else Color(0xFF1976D2))
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(if (isDarkMode) Color(0xFF121212) else Color(0xFFE1F5FE))
+                .padding(paddingValues)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.funfacts_image),
+                contentDescription = "Fun Facts image",
+                modifier = Modifier.size(140.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Fun Facts", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("• I love gaming and the process behind making them!", fontSize = 17.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("• My favorite color is yellow, but not to wear", fontSize = 17.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("• I enjoy learning new tech.", fontSize = 17.sp)
+        }
+    }
 }
